@@ -1,7 +1,9 @@
 # کاتالوگ ابزارهای تولید Police Simulator 3D
 
-> نسخهٔ کاتالوگ: 1.0 — تاریخ بازبینی: 2026-11-21  
+> نسخهٔ کاتالوگ: 1.1 — تاریخ بازبینی: 2026-11-21  
 > این فایل فهرست دسترسی به ابزارهای درخواستی و نقش هرکدام در خط تولید بازی است؛ **نصاب یا لایسنس نرم‌افزارها را داخل Git قرار نمی‌دهد**.
+
+نسخهٔ ماشین‌خوان همین فهرست در [tools/manifest.json](../tools/manifest.json) نگه‌داری می‌شود. راهنمای نصب و ترتیب اجرا در [TOOLCHAIN_SETUP.md](TOOLCHAIN_SETUP.md) است. ثبت در کاتالوگ به معنی دانلود یا نصب شدن برنامه روی سیستم توسعه‌دهنده نیست.
 
 ## سیاست تهیه و نگه‌داری
 
@@ -32,7 +34,7 @@
 | GIMP | ویرایش تصویر و پردازش دسته‌ای | [GIMP Downloads](https://www.gimp.org/downloads/) |
 | Aseprite | پیکسل‌آرت و آیکون‌های سبک رترو | [Aseprite](https://www.aseprite.org/) |
 | Clip Studio Paint | طراحی کاراکتر، تصویرسازی و کانسپت | [Clip Studio Paint](https://www.clipstudio.net/en/) |
-| Affinity Photo | ویرایش تصویر؛ نسخهٔ جدید دسکتاپ در مجموعهٔ Affinity by Canva ارائه شده است | [Affinity Download](https://www.affinity.studio/download) |
+| Affinity Photo | نام ابزار قدیمی ویرایش تصویر؛ قابلیت‌های photo/pixel اکنون در برنامهٔ واحد جدید Affinity در کنار ابزارهای vector/layout ارائه می‌شوند | [Affinity Download](https://www.affinity.studio/download) |
 | Inkscape | طراحی برداری برای نشان‌ها، نقشه‌ها و آیکون‌ها | [Inkscape Releases](https://inkscape.org/release/) |
 | Piskel | ساخت پیکسل‌آرت در مرورگر | [Piskel](https://www.piskelapp.com/) |
 | LibreSprite | ویرایشگر آزاد پیکسل‌آرت | [LibreSprite](https://libresprite.github.io/) |
@@ -57,7 +59,7 @@
 | Mixamo | ریگ و انیمیشن آمادهٔ کاراکتر؛ خروجی باید از نظر مجوز و سازگاری بررسی شود | [Mixamo](https://www.mixamo.com/) |
 | Spine 2D | انیمیشن استخوانی دوبعدی برای UI و عناصر دوبعدی | [Spine](https://esotericsoftware.com/) |
 | DragonBones | ابزار و runtime انیمیشن استخوانی دوبعدی؛ سازگاری نسخه و runtime را پیش از استفاده آزمایش کنید | [DragonBones GitHub](https://github.com/DragonBones) |
-| Adobe Animate | انیمیشن دوبعدی؛ در وضعیت Maintenance Mode است | [Adobe Animate](https://www.adobe.com/products/animate.html) |
+| Adobe Animate | انیمیشن دوبعدی؛ وضعیت نگه‌داری و release notes رسمی با هم بازبینی شوند، چون یادداشت انتشار نوامبر ۲۰۲۶ نسخهٔ 27.0 و قابلیت‌های تازه را فهرست می‌کند | [Adobe Animate](https://www.adobe.com/products/animate.html) |
 | Cascadeur | کمک به ساخت و اصلاح انیمیشن سه‌بعدی | [Cascadeur](https://cascadeur.com/) |
 | Autodesk MotionBuilder | موشن‌کپچر و ویرایش انیمیشن کاراکتر | [Autodesk MotionBuilder](https://www.autodesk.com/products/motionbuilder/overview) |
 | Rive | انیمیشن تعاملی برای رابط کاربری و عناصر دوبعدی | [Rive](https://rive.app/) |
@@ -113,12 +115,20 @@
 
 ## وضعیت ویژهٔ ابزارها
 
-- **Modo:** Foundry در 7 نوامبر 2024 پایان توسعهٔ Modo را اعلام کرد؛ نسخه‌های موجود ممکن است کار کنند، اما انتشار نسخه و پشتیبانی جدید متوقف شده است.
-- **Adobe XD:** Adobe آن را در وضعیت نگه‌داری قرار داده است؛ قابلیت‌های جدید در برنامهٔ توسعه نیستند.
-- **Adobe Animate:** Adobe آن را در وضعیت نگه‌داری قرار داده است؛ طبق راهنمای رسمی، پشتیبانی و اصلاحات امنیتی ادامه دارد اما قابلیت جدید برنامه‌ریزی نشده است.
-- **Affinity Photo:** صفحهٔ رسمی دانلود، استفاده از برنامهٔ جدید Affinity by Canva را برای تجربهٔ جدید توصیه می‌کند؛ فایل‌ها و نسخه‌های قدیمی را جداگانه نگه دارید.
+- **Modo:** Foundry اعلام کرد توسعهٔ Modo متوقف می‌شود؛ مقالهٔ پشتیبانی Foundry که در اکتبر ۲۰۲۶ به‌روزرسانی شده می‌گوید دیگر نسخه، مجوز یا پشتیبانی جدیدی ارائه نمی‌شود. برای خط تولید جدید انتخاب نشود.
+- **Adobe XD:** صفحهٔ راهنمای Adobe همچنان آن را در وضعیت maintenance mode اعلام می‌کند؛ قابلیت‌های جدیدی در برنامه نیست.
+- **Adobe Animate:** یک FAQ رسمی Adobe (ژوئن ۲۰۲۶) maintenance mode را بیان می‌کند، اما release notes رسمیِ به‌روزشده در ۱۶ نوامبر ۲۰۲۶ برای نسخهٔ 27.0 قابلیت‌هایی را فهرست کرده‌اند. به‌خاطر این تفاوت، پیش از انتخاب، آخرین release notes و اطلاعیهٔ Adobe را بررسی کنید و برچسب قدیمیِ «بدون قابلیت جدید» را قطعی فرض نکنید.
+- **Affinity Photo:** تجربهٔ جدید Affinity یک برنامهٔ واحد با ابزارهای photo/pixel، vector و layout است؛ عنوان Affinity Photo برای محصول قدیمی‌تر استفاده می‌شد.
 - **Gaea:** صفحهٔ رسمی دانلود ممکن است نسخهٔ پایدار و نسخهٔ آزمایشی را هم‌زمان ارائه کند؛ نسخهٔ آزمایشی را برای تولید نهایی انتخاب نکنید.
 - **DragonBones:** پیش از انتخاب نهایی، فرمت export و runtime آن را با نسخهٔ Three.js و مسیر انیمیشن بازی آزمایش کنید.
+
+## منابع رسمی برای وضعیت محصولات
+
+- [Foundry: Modo support status](https://support.foundry.com/hc/en-us/articles/207678535-Q100035)
+- [Adobe XD maintenance mode](https://helpx.adobe.com/xd/desktop.html)
+- [Adobe Animate maintenance-mode FAQ](https://helpx.adobe.com/animate/desktop/kb/maintenance-mode.html)
+- [Adobe Animate release notes](https://helpx.adobe.com/mena_en/animate/desktop/introduction-to-animate/release-notes.html)
+- [Canva: all-new Affinity](https://www.canva.com/newsroom/news/all-new-affinity/)
 
 ## قاعدهٔ انتخاب
 
