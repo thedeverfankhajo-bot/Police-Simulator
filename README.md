@@ -60,6 +60,8 @@ The official tools list, download pages, current-status notes, licensing reminde
 - [Tools catalog](docs/TOOLS_CATALOG.md)
 - [Machine-readable tool manifest](tools/manifest.json)
 - [Toolchain setup guide](docs/TOOLCHAIN_SETUP.md)
+- [Windows installer downloader](tools/download-windows-open-source.ps1)
+- [Manual installer-download workflow](.github/workflows/download-open-source-tools.yml)
 - [Production pipeline and asset standards](docs/PRODUCTION_PIPELINE.md)
 
 Commercial installers and license files are intentionally not copied into this repository. Obtain software from the publishers' official websites and follow each product's license.
