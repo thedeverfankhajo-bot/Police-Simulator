@@ -56,3 +56,44 @@
 ## وضعیت نامشخص یا نیازمند بررسی
 
 این کاتالوگ لینک‌های رسمی و وضعیت کلی را ثبت می‌کند؛ **نصب، سازگاری نسخه و حق استفادهٔ تجاری هیچ ابزار/asset را خودکار تأیید نمی‌کند.** وضعیت محصولات در طول زمان تغییر می‌کند. پیش از شروع production، release notes و terms رسمی همان نسخه را دوباره بررسی کن.
+
+
+## دانلود واقعی نصاب‌ها (Windows x64)
+
+برای تهیهٔ **فایل‌های اجرایی واقعی**، این مخزن یک اسکریپت PowerShell و یک GitHub Actions workflow دارد. این مرحله فقط نصاب‌ها را دانلود می‌کند و هیچ برنامه‌ای را نصب یا اجرا نمی‌کند.
+
+### دریافت از داخل GitHub
+
+1. صفحهٔ مخزن را باز کن و وارد زبانهٔ **Actions** شو.
+2. از فهرست Workflowها، **Download open-source tool installers (Windows x64)** را انتخاب کن.
+3. گزینهٔ **Run workflow** را روی شاخهٔ `main` اجرا کن.
+4. پس از پایان اجرا، در صفحهٔ همان Workflow بخش **Artifacts** را باز کن و فایل `police-simulator-open-source-installers-windows-x64` را دریافت کن.
+5. داخل بسته، برای هر ابزار پوشهٔ جداگانه و فایل `download-report.json` شامل اندازه و SHA-256 قرار می‌گیرد.
+
+این Workflow فعلاً برای این ۷ ابزار دارای بستهٔ WinGet تنظیم شده است: Blender، Krita، GIMP، Inkscape، Audacity، LMMS و Tiled. اگر یک بسته از منبع WinGet در زمان اجرا در دسترس نباشد، در گزارش با وضعیت خطا ثبت می‌شود؛ موفقیت دانلود همهٔ بسته‌ها فرض نمی‌شود.
+
+### اجرا روی رایانهٔ توسعه‌دهنده
+
+روی Windows 11 یا Windows Server 2025 که WinGet در دسترس دارد، از ریشهٔ مخزن اجرا کن:
+
+```powershell
+.	oolsdownload-windows-open-source.ps1
+```
+
+نصاب‌ها در `tools/downloads/` ذخیره می‌شوند. برای معماری دیگر:
+
+```powershell
+.	oolsdownload-windows-open-source.ps1 -Architecture arm64
+```
+
+### ابزارهایی که این بسته شامل آن‌ها نیست
+
+- Autodesk، Adobe، Maxon، ZBrush، Clip Studio Paint، Aseprite و سایر محصولات تجاری: دریافت باید از حساب یا صفحهٔ رسمی ناشر و مطابق مجوز همان کاربر انجام شود.
+- Firebase، Supabase، Figma، Rive و Mixamo: سرویس آنلاین‌اند؛ نصاب قابل‌قرار دادن در مخزن برای خود سرویس ابری وجود ندارد.
+- ProBuilder و Chaos: وابسته به Unity و Unreal هستند.
+- PhysX، Box2D، Jolt، Bullet و Rapier: کتابخانه/SDK هستند و باید به‌عنوان وابستگی نسخه‌بندی‌شده به پروژه اضافه شوند، نه برنامهٔ دسکتاپ.
+- Blender Animation قابلیت داخلی Blender است و نصاب جداگانه ندارد.
+
+### نگه‌داری
+
+نصاب‌ها در Git source history commit نمی‌شوند. دانلود محلی در `tools/downloads/` قرار می‌گیرد و با `.gitignore` از commit تصادفی محافظت می‌شود. اجرای GitHub Actions نیز بسته‌ها را به شکل Artifact با مهلت نگه‌داری ۱۴ روزه ارائه می‌کند. برای هر نصب، مجوز ناشر، شرایط استفادهٔ تجاری و مجوز اجزای همراه را بخوان؛ وجود یک فایل در Artifact به معنی اجازهٔ بازتوزیع آن نیست.
