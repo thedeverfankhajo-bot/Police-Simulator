@@ -52,7 +52,6 @@ See [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md). Never put
 
 No license has been selected yet. Do not assume the code or future assets are licensed for redistribution until a license is added.
 
-
 ## Production tool catalog
 
 The official tools list, download pages, current-status notes, licensing reminders, and suggested production workflow are documented here:
@@ -60,6 +59,7 @@ The official tools list, download pages, current-status notes, licensing reminde
 - [Tools catalog](docs/TOOLS_CATALOG.md)
 - [Machine-readable tool manifest](tools/manifest.json)
 - [Toolchain setup guide](docs/TOOLCHAIN_SETUP.md)
+- [Verified download status and artifact link](docs/DOWNLOAD_STATUS.md)
 - [Windows installer downloader](tools/download-windows-open-source.ps1)
 - [Manual installer-download workflow](.github/workflows/download-open-source-tools.yml)
 - [Production pipeline and asset standards](docs/PRODUCTION_PIPELINE.md)
