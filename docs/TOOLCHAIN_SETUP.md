@@ -57,33 +57,32 @@
 
 این کاتالوگ لینک‌های رسمی و وضعیت کلی را ثبت می‌کند؛ **نصب، سازگاری نسخه و حق استفادهٔ تجاری هیچ ابزار/asset را خودکار تأیید نمی‌کند.** وضعیت محصولات در طول زمان تغییر می‌کند. پیش از شروع production، release notes و terms رسمی همان نسخه را دوباره بررسی کن.
 
-
 ## دانلود واقعی نصاب‌ها (Windows x64)
 
-برای تهیهٔ **فایل‌های اجرایی واقعی**، این مخزن یک اسکریپت PowerShell و یک GitHub Actions workflow دارد. این مرحله فقط نصاب‌ها را دانلود می‌کند و هیچ برنامه‌ای را نصب یا اجرا نمی‌کند.
+مخزن یک اسکریپت PowerShell و یک GitHub Actions workflow دارد. این مرحله فقط نصاب‌ها را دانلود می‌کند و هیچ برنامه‌ای را نصب یا اجرا نمی‌کند. فایل‌های دانلودی در Git history قرار نمی‌گیرند؛ خروجی اجرا به شکل Artifact در بخش Actions ذخیره می‌شود.
 
-### دریافت از داخل GitHub
+### دریافت بستهٔ آماده از GitHub
 
 1. صفحهٔ مخزن را باز کن و وارد زبانهٔ **Actions** شو.
-2. از فهرست Workflowها، **Download open-source tool installers (Windows x64)** را انتخاب کن.
+2. Workflow با عنوان **Download open-source tool installers (Windows x64)** را انتخاب کن.
 3. گزینهٔ **Run workflow** را روی شاخهٔ `main` اجرا کن.
-4. پس از پایان اجرا، در صفحهٔ همان Workflow بخش **Artifacts** را باز کن و فایل `police-simulator-open-source-installers-windows-x64` را دریافت کن.
-5. داخل بسته، برای هر ابزار پوشهٔ جداگانه و فایل `download-report.json` شامل اندازه و SHA-256 قرار می‌گیرد.
+4. پس از پایان موفق اجرا، در صفحهٔ همان Workflow بخش **Artifacts** را باز کن و فایل `police-simulator-open-source-installers-windows-x64` را دریافت کن.
+5. بسته شامل پوشهٔ جداگانه برای هر برنامه و `download-report.json` شامل اندازه و SHA-256 است.
 
-این Workflow فعلاً برای این ۷ ابزار دارای بستهٔ WinGet تنظیم شده است: Blender، Krita، GIMP، Inkscape، Audacity، LMMS و Tiled. اگر یک بسته از منبع WinGet در زمان اجرا در دسترس نباشد، در گزارش با وضعیت خطا ثبت می‌شود؛ موفقیت دانلود همهٔ بسته‌ها فرض نمی‌شود.
+**محدودهٔ فعلی دانلود خودکار:** فقط این ۷ مورد دارای شناسهٔ WinGet در اسکریپت هستند: Blender، Krita، GIMP، Inkscape، Audacity، LMMS و Tiled. این به معنی دانلود شدن آن‌ها در حال حاضر نیست؛ فقط پس از اجرای workflow و مشاهدهٔ Artifact می‌توان موفقیت را تأیید کرد. بسته‌هایی که در WinGet موجود نباشند در گزارش با خطا ثبت می‌شوند.
 
 ### اجرا روی رایانهٔ توسعه‌دهنده
 
 روی Windows 11 یا Windows Server 2025 که WinGet در دسترس دارد، از ریشهٔ مخزن اجرا کن:
 
 ```powershell
-.	oolsdownload-windows-open-source.ps1
+.\tools\download-windows-open-source.ps1
 ```
 
 نصاب‌ها در `tools/downloads/` ذخیره می‌شوند. برای معماری دیگر:
 
 ```powershell
-.	oolsdownload-windows-open-source.ps1 -Architecture arm64
+.\tools\download-windows-open-source.ps1 -Architecture arm64
 ```
 
 ### ابزارهایی که این بسته شامل آن‌ها نیست
