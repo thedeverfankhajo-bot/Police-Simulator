@@ -7,8 +7,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# First verified starter batch only: these packages have WinGet package IDs.
 # This script DOWNLOADS installers only. It never installs or executes them.
-# WinGet verifies each installer against the SHA-256 declared by its package manifest.
+# WinGet validates installer hashes against its package manifests where supported.
+# The resulting installers stay in the ignored tools/downloads/ directory.
 
 $packages = @(
     [pscustomobject]@{ Id = "BlenderFoundation.Blender"; Name = "Blender"; License = "GPL-3.0-or-later"; Category = "3D authoring" },
@@ -80,11 +82,15 @@ foreach ($package in $packages) {
 }
 
 $report = [pscustomobject]@{
-    schema_version = "1.0.0"
+    schema_version = "1.0.1"
     project = "Police Simulator 3D"
     created_utc = (Get-Date).ToUniversalTime().ToString("o")
     platform = "Windows.Desktop"
     architecture = $Architecture
+    package_source = "WinGet"
+    requested_count = $packages.Count
+    downloaded_count = @($results | Where-Object { $_.status -eq "downloaded" }).Count
+    failed_count = @($results | Where-Object { $_.status -ne "downloaded" }).Count
     note = "Downloaded installers only; no software was installed. Review each publisher EULA and license before use or redistribution."
     packages = @($results)
 }
