@@ -1,0 +1,32 @@
+name: Download open-source tool installers (Windows x64)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  download:
+    name: Download approved starter toolset
+    runs-on: windows-2025
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download installers (no installation)
+        shell: pwsh
+        run: .\tools\download-windows-open-source.ps1 -DownloadDirectory ".\tools\downloads" -Architecture x64
+
+      - name: Upload installer bundle as a GitHub Actions artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: police-simulator-open-source-installers-windows-x64
+          path: tools/downloads/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0
