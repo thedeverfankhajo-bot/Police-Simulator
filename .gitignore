@@ -1,0 +1,13 @@
+# Locally downloaded third-party installers are not source code.
+tools/downloads/
+*.msi
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.AppImage
+*.zip
+*.7z
+*.tar.gz
+*.iso
