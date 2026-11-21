@@ -58,6 +58,8 @@ No license has been selected yet. Do not assume the code or future assets are li
 The official tools list, download pages, current-status notes, licensing reminders, and suggested production workflow are documented here:
 
 - [Tools catalog](docs/TOOLS_CATALOG.md)
+- [Machine-readable tool manifest](tools/manifest.json)
+- [Toolchain setup guide](docs/TOOLCHAIN_SETUP.md)
 - [Production pipeline and asset standards](docs/PRODUCTION_PIPELINE.md)
 
 Commercial installers and license files are intentionally not copied into this repository. Obtain software from the publishers' official websites and follow each product's license.
