@@ -1,37 +1,58 @@
 # تهیهٔ ابزارها و وضعیت مجوزها — Police Simulator
 
-تاریخ بررسی: 2026-11-22
+تاریخ ثبت: 2026-11-22
 
 ## نتیجهٔ بررسی
 
-- فهرست ورودی حدود ۶۰ مورد یکتا دارد. موارد تکراری یک‌بار ثبت شده‌اند: Houdini، Rive و Photoshop. «Blender Animation» قابلیت داخل Blender است، نه برنامهٔ جدا.
-- Mixamo و Firebase سرویس آنلاین‌اند؛ ProBuilder و Chaos Physics به Unity/Unreal وابسته‌اند؛ بسیاری از physics SDKها کتابخانهٔ توسعه هستند، نه اپلیکیشن قابل نصب.
-- مجوز نرم‌افزار پولی قابل ساختن یا انتقال از طرف مخزن نیست. حساب و مجوز باید توسط استفاده‌کننده از ناشر تهیه شود. هیچ کلید، کرک یا نسخهٔ دستکاری‌شده‌ای در مخزن قرار نمی‌گیرد.
-- installerها در Git قرار نمی‌گیرند تا تاریخچهٔ مخزن با فایل‌های چندگیگابایتی آلوده نشود. دانلودها به‌صورت Artifact موقت GitHub Actions تحویل داده می‌شوند.
-- در این مرحله هیچ installerای دانلود یا نصب نشده است. فایل‌های راهنما و فهرست ثبت شده‌اند؛ اجرای workflow باید از GitHub Actions انجام شود.
+- فهرست ورودی پس از حذف تکراری‌ها **۶۰ ابزار/فناوری یکتا** دارد. Houdini، Rive و Photoshop تکراری بودند و «Blender Animation» قابلیت خود Blender است.
+- بعضی موارد برنامهٔ مستقل نیستند: Mixamo و Firebase سرویس آنلاین‌اند؛ ProBuilder و Chaos Physics به Unity/Unreal وابسته‌اند؛ بیشتر SDKهای فیزیک کتابخانهٔ توسعه هستند.
+- مجوز نرم‌افزار پولی قابل ساختن یا انتقال از طرف مخزن نیست. هر کاربر باید حساب و مجوز معتبر را از ناشر بگیرد. هیچ کرک، کلید مجوز، نسخهٔ دستکاری‌شده یا installer اختصاصی در مخزن قرار نمی‌گیرد.
+- فایل‌های نصب در Git commit نمی‌شوند؛ در GitHub Actions به شکل Artifact زمان‌دار قرار می‌گیرند تا تاریخچهٔ مخزن سنگین نشود.
 
-## فایل‌های اضافه‌شده
+## دانلود واقعیِ انجام‌شده
 
-- toolchain/manifest.json: فهرست ساخت‌یافتهٔ ۶۰ ابزار/فناوری، مجوز، روش دریافت و لینک رسمی.
-- tools/download-windows-open-source.ps1: اسکریپت موجود برای دریافت دستهٔ شروع.
-- .gitignore: جلوگیری از commit شدن installerها، cacheها و خروجی build.
+در اجرای موفق GitHub Actions به تاریخ **2026-11-21**، اسکریپت ۷ برنامه را تلاش کرد دانلود کند:
 
-## دریافت دستهٔ آزادِ آماده
+| ابزار | نسخهٔ ثبت‌شده در گزارش | نتیجه |
+|---|---:|---|
+| Blender | 5.3.0 | دانلود شد |
+| Krita | 5.3.4.1 | دانلود شد |
+| GIMP | 3.2.6 | دانلود شد |
+| Inkscape | 1.4.4 | دانلود ناموفق؛ WinGet خطای موقت `0x8a15006d` (سرویس مشغول/در دسترس نبود) |
+| Audacity | 4.0.2.263060742 | دانلود شد |
+| LMMS | 1.2.2 | دانلود شد |
+| Tiled | 1.12.2 | دانلود شد |
 
-اسکریپت فعلی با WinGet این ۷ برنامه را دریافت می‌کند: Blender، Krita، GIMP، Inkscape، Audacity، LMMS و Tiled. installer را اجرا یا نصب نمی‌کند و SHA-256 فایل‌ها را در download-report.json ثبت می‌کند.
+**جمع‌بندی اجرای قبلی: ۶ موفق، ۱ ناموفق.** همهٔ دانلودهای موفق، hash نصب‌کننده را با WinGet تأیید کردند. فایل‌ها نصب یا اجرا نشده‌اند.
 
-### اجرا روی Windows 11 / Windows Server 2025
+[دانلود Artifact از GitHub Actions](https://github.com/thedeverfankhajo-bot/Police-Simulator/actions/runs/44922044591/artifacts/14716786288)
 
-از ریشهٔ پروژه در PowerShell این دستورها را اجرا کنید:
+- حجم Artifact: حدود ۸۴۹٫۵ مگابایت
+- SHA-256 فایل ZIP: `04def176bd360da3a2492064044f9d8218ec4f02df4dbf177a7b65bce8e49ea0`
+- انقضای Artifact: **2026-12-05 17:02 UTC**
+- دانلود از این محیط به‌دلیل بزرگ‌تر بودن Artifact از سقف انتقال ۵۱۲ مگابایت ممکن نشد؛ لینک GitHub بالا برای دریافت مستقیم در مرورگر است.
 
-    Set-ExecutionPolicy -Scope Process Bypass
-    .\tools\download-windows-open-source.ps1 -DownloadDirectory ".\tools\downloads" -Architecture x64
+## فایل‌های این مرحله
 
-پس از اجرا، فایل‌ها در tools/downloads قرار می‌گیرند. گزارش و SHA-256 در tools/downloads/download-report.json ساخته می‌شود. پیش از نصب، ناشر، امضای دیجیتال، SHA-256 و EULA همان نسخه را بررسی کنید.
+- `toolchain/manifest.json`: فهرست ساخت‌یافتهٔ ۶۰ ابزار/فناوری همراه با مجوز اعلام‌شده، روش تهیه و لینک رسمی.
+- `toolchain/last-download-run.json`: نتیجهٔ دقیق اجرای قبلی، نسخه‌ها، Artifact و خطای Inkscape.
+- `tools/download-windows-open-source.ps1`: اسکریپت دانلود فعلی برای دستهٔ هفت‌تایی شروع.
+- `.gitignore`: جلوگیری از commit شدن installerها، فایل‌های محیطی و خروجی build.
 
-### اجرا از GitHub Actions
+## تکرار دانلود روی Windows
 
-در GitHub به Actions بروید، workflow با نام Download open-source tool installers (Windows x64) را انتخاب کنید، سپس Run workflow را بزنید و شاخهٔ موردنظر را مشخص کنید. خروجی در Artifact با نام police-simulator-open-source-installers-windows-x64 قرار می‌گیرد و طبق workflow فعلی ۱۴ روز نگهداری می‌شود. Artifact فایل commit‌شده در مخزن نیست.
+روی Windows 11 یا Windows Server 2025، از ریشهٔ پروژه در PowerShell اجرا کنید:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\tools\download-windows-open-source.ps1 -DownloadDirectory ".\tools\downloads" -Architecture x64
+```
+
+اسکریپت نصب‌کننده‌ها را فقط دانلود می‌کند، آن‌ها را اجرا یا نصب نمی‌کند و SHA-256 فایل‌ها را در `tools/downloads/download-report.json` ثبت می‌کند. در پایان، ناشر، امضای دیجیتال، hash و EULA همان نسخه را بررسی کنید.
+
+## اجرای دوباره از GitHub Actions
+
+در مخزن به **Actions → Download open-source tool installers (Windows x64) → Run workflow** بروید و شاخهٔ موردنظر را اجرا کنید. Artifact خروجی طبق workflow فعلی ۱۴ روز نگهداری می‌شود.
 
 ## دسته‌بندی مجوزها
 
@@ -39,14 +60,14 @@
 |---|---|
 | آزاد و متن‌باز | توزیع سورس/باینری تنها با رعایت متن مجوز، اعلان copyright و الزامات copyleft مجاز است. |
 | رایگان اما اختصاصی | قیمت صفر به معنی اجازهٔ کپی یا انتشار مجدد نیست. |
-| تجاری/اشتراکی | هر کاربر/تیم باید entitlement معتبر ناشر داشته باشد. |
+| تجاری/اشتراکی | هر کاربر/تیم باید مجوز معتبر ناشر داشته باشد. |
 | سرویس آنلاین | چیزی برای قرار دادن داخل مخزن وجود ندارد؛ secretها بیرون از Git نگهداری می‌شوند. |
 | وابسته به موتور بازی | از داخل Unity/Unreal و تحت EULA همان موتور دریافت می‌شود. |
 | نسخه‌محور/نامشخص | نسخه و EULA دقیق باید قبل از استفاده یا انتشار قفل و بررسی شود. |
 
 ## نکات حقوقی انتشار بازی
 
-1. لایسنس ابزار ساخت با لایسنس فایل خروجی یکی نیست؛ مدل‌ها، تکسچرها، فونت‌ها، صداها، موشن‌ها، پلاگین‌ها و asset packها مجوز جداگانه دارند.
+1. مجوز ابزار ساخت با مجوز فایل خروجی یکی نیست؛ مدل‌ها، تکسچرها، فونت‌ها، صداها، موشن‌ها، پلاگین‌ها و asset packها مجوز جداگانه دارند.
 2. MIT، Apache-2.0، BSD و Zlib معمولاً استفادهٔ تجاری را اجازه می‌دهند، اما اعلان‌های مجوز و copyright باید حفظ شوند. GPL و LGPL الزام‌های copyleft خود را دارند.
 3. Redis نسخهٔ ۸ به بعد انتخاب‌های AGPL-3.0، RSALv2 یا SSPLv1 دارد. نسخه و مجوز باید صریح باشد.
 4. MongoDB Server تحت SSPL است؛ آن را بدون توضیح «متن‌باز OSI» معرفی نکنید.
@@ -63,4 +84,4 @@
 - داده: PostgreSQL یا Supabase؛ Firebase/Appwrite/PocketBase را هم‌زمان اضافه نکنید.
 - UI: Penpot برای طراحی؛ UI نهایی داخل موتور بازی پیاده‌سازی شود.
 
-فهرست کامل و لینک رسمی هر مورد در toolchain/manifest.json است. ثبت‌شدن یک ابزار به معنی نصب‌شدن یا خریداری‌شدن مجوز آن نیست.
+فهرست کامل و لینک رسمی هر مورد در `toolchain/manifest.json` است. ثبت‌شدن یک ابزار به معنی نصب‌شدن یا خریداری‌شدن مجوز آن نیست.
