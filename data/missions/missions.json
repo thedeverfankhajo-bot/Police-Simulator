@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "missions": [
+    {
+      "id": "CIV-001",
+      "title_fa": "راهنمایی شهروند در مرکز شهر",
+      "title_en": "Assist a resident downtown",
+      "description_fa": "یک شهروند برای پیدا کردن ساختمان خدمات شهری به راهنمایی نیاز دارد.",
+      "description_en": "A resident needs directions to the public service building.",
+      "type": "help_citizen",
+      "location": [
+        -31,
+        0,
+        -16
+      ],
+      "priority": "عادی",
+      "reward": 120,
+      "trust": 3,
+      "target_label": "راهنمایی شهروند"
+    },
+    {
+      "id": "TRF-002",
+      "title_fa": "رسیدگی به انسداد پیاده‌رو",
+      "title_en": "Resolve a blocked sidewalk",
+      "description_fa": "مانعی کنار بلوار قرار دارد؛ مسیر امن عبور عابران را دوباره باز کنید.",
+      "description_en": "An obstruction is blocking a sidewalk. Restore a clear pedestrian route.",
+      "type": "sidewalk",
+      "location": [
+        31,
+        0,
+        15
+      ],
+      "priority": "عادی",
+      "reward": 150,
+      "trust": 4,
+      "target_label": "مانع پیاده‌رو"
+    },
+    {
+      "id": "CIV-003",
+      "title_fa": "تحویل شیء گمشده",
+      "title_en": "Return a lost item",
+      "description_fa": "کیفی کنار پارک پیدا شده است؛ محل پیدا شدن را بررسی و آن را ثبت کنید.",
+      "description_en": "A bag was found near the park. Inspect the location and register it.",
+      "type": "lost_item",
+      "location": [
+        -14,
+        0,
+        16
+      ],
+      "priority": "پایین",
+      "reward": 110,
+      "trust": 3,
+      "target_label": "کیف گمشده"
+    },
+    {
+      "id": "CITY-004",
+      "title_fa": "بررسی چراغ خیابان",
+      "title_en": "Inspect a street light",
+      "description_fa": "چراغ روشنایی یک گذر خاموش شده است؛ محل را بررسی و درخواست تعمیر ثبت کنید.",
+      "description_en": "A walkway light is out. Inspect it and register a maintenance request.",
+      "type": "street_light",
+      "location": [
+        61,
+        0,
+        31
+      ],
+      "priority": "عادی",
+      "reward": 130,
+      "trust": 3,
+      "target_label": "چراغ خاموش"
+    },
+    {
+      "id": "CIV-005",
+      "title_fa": "کمک به عابر در پارک",
+      "title_en": "Help a visitor in the park",
+      "description_fa": "بازدیدکننده‌ای مسیر خروجی پارک را گم کرده است؛ او را راهنمایی کنید.",
+      "description_en": "A park visitor has lost the exit route. Offer clear directions.",
+      "type": "help_citizen",
+      "location": [
+        0,
+        0,
+        -14
+      ],
+      "priority": "عادی",
+      "reward": 125,
+      "trust": 3,
+      "target_label": "بازدیدکننده پارک"
+    },
+    {
+      "id": "TRF-006",
+      "title_fa": "رسیدگی به توقف نامناسب",
+      "title_en": "Resolve a parking complaint",
+      "description_fa": "یک خودرو مسیر دسترسی خدمات شهری را محدود کرده است؛ موضوع را محترمانه پیگیری کنید.",
+      "description_en": "A car is limiting access to a service bay. Resolve the complaint respectfully.",
+      "type": "parking",
+      "location": [
+        45,
+        0,
+        61
+      ],
+      "priority": "عادی",
+      "reward": 145,
+      "trust": 4,
+      "target_label": "گزارش پارک خودرو"
+    },
+    {
+      "id": "CITY-007",
+      "title_fa": "ثبت خرابی تجهیزات عمومی",
+      "title_en": "Report damaged public equipment",
+      "description_fa": "نیمکت آسیب‌دیده‌ای در محله مسکونی گزارش شده است؛ آن را بررسی کنید.",
+      "description_en": "A damaged bench was reported in a residential block. Inspect and log it.",
+      "type": "maintenance",
+      "location": [
+        -61,
+        0,
+        31
+      ],
+      "priority": "پایین",
+      "reward": 115,
+      "trust": 3,
+      "target_label": "نیمکت آسیب‌دیده"
+    },
+    {
+      "id": "CIV-008",
+      "title_fa": "ثبت درخواست راهنمایی",
+      "title_en": "Record a public assistance request",
+      "description_fa": "در منطقه تجاری درخواست راهنمایی ثبت شده است؛ با شهروند گفت‌وگو کنید.",
+      "description_en": "A resident in the business district requests assistance. Speak with them.",
+      "type": "help_citizen",
+      "location": [
+        43,
+        0,
+        -30
+      ],
+      "priority": "عادی",
+      "reward": 130,
+      "trust": 4,
+      "target_label": "درخواست شهروند"
+    }
+  ]
+}

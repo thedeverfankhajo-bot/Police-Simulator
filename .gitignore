@@ -33,3 +33,7 @@ secrets/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Godot editor/import cache
+.godot/
+*.translation

@@ -1,0 +1,137 @@
+extends Node
+
+signal language_changed(language_code: String)
+
+var language: String = "fa"
+
+const TEXTS := {
+	"fa": {
+		"title": "POLICE SIMULATOR 3D",
+		"subtitle": "شبیه‌ساز حرفه‌ای پلیس سه‌بعدی",
+		"start": "شروع گشت",
+		"continue": "ادامه بازی",
+		"settings": "تنظیمات",
+		"language": "تغییر زبان",
+		"dispatch": "مرکز اعزام مأموریت",
+		"map": "نقشه شهر",
+		"reports": "گزارش‌ها",
+		"profile": "پرونده افسر",
+		"save": "ذخیره بازی",
+		"resume": "بازگشت به بازی",
+		"back": "بازگشت",
+		"accept": "پذیرش مأموریت",
+		"close": "بستن",
+		"mission_none": "مأموریت فعالی ندارید",
+		"mission_ready": "مأموریت آماده دریافت است",
+		"interact": "E  تعامل",
+		"walk": "WASD حرکت  •  Shift دویدن",
+		"drive": "WASD رانندگی  •  Space ترمز دستی  •  Q چراغ هشدار",
+		"dispatch_hint": "برای دریافت مأموریت به رایانه مرکز پلیس مراجعه کنید",
+		"speed": "سرعت",
+		"trust": "اعتماد عمومی",
+		"level": "سطح",
+		"xp": "تجربه",
+		"missions": "مأموریت تکمیل‌شده",
+		"weather": "تغییر وضعیت هوا",
+		"saved": "بازی ذخیره شد",
+		"save_failed": "ذخیره انجام نشد",
+		"no_reports": "هنوز گزارشی ثبت نشده است",
+		"report_saved": "گزارش گشت ثبت شد",
+		"citizen_title": "گفت‌وگو با شهروند",
+		"citizen_text": "شهروند درخواست راهنمایی و کمک دارد. با احترام گوش کنید و موضوع را ثبت کنید.",
+		"record": "ثبت گفت‌وگو",
+		"settings_title": "تنظیمات بازی",
+		"volume": "صدای محیط",
+		"mouse": "حساسیت دوربین",
+		"graphics": "کیفیت گرافیک",
+		"graphics_low": "کم",
+		"graphics_high": "زیاد",
+		"pause": "بازی متوقف شد",
+		"objective": "هدف مأموریت",
+		"no_active": "بدون مأموریت فعال",
+		"station": "مرکز پلیس",
+		"district": "ناحیه شهری",
+		"vehicle": "خودروی گشت",
+		"on_foot": "گشت پیاده",
+		"weather_sunny": "آفتابی",
+		"weather_cloudy": "ابری",
+		"weather_rain": "بارانی",
+		"weather_fog": "مه‌آلود",
+		"mission_done": "مأموریت با موفقیت تکمیل شد",
+		"mission_received": "مأموریت دریافت شد",
+		"no_mission": "مأموریت دیگری در دسترس نیست",
+		"distance": "فاصله تا هدف",
+		"case": "شماره پرونده"
+	},
+	"en": {
+		"title": "POLICE SIMULATOR 3D",
+		"subtitle": "Professional 3D Police Simulator",
+		"start": "Start Patrol",
+		"continue": "Continue",
+		"settings": "Settings",
+		"language": "Switch language",
+		"dispatch": "Dispatch Center",
+		"map": "City Map",
+		"reports": "Reports",
+		"profile": "Officer Profile",
+		"save": "Save Game",
+		"resume": "Resume",
+		"back": "Back",
+		"accept": "Accept Mission",
+		"close": "Close",
+		"mission_none": "No active mission",
+		"mission_ready": "A mission is ready",
+		"interact": "E  Interact",
+		"walk": "WASD Move  •  Shift Run",
+		"drive": "WASD Drive  •  Space Handbrake  •  Q Warning Lights",
+		"dispatch_hint": "Visit the police station computer to receive a mission",
+		"speed": "Speed",
+		"trust": "Public Trust",
+		"level": "Level",
+		"xp": "XP",
+		"missions": "Missions Completed",
+		"weather": "Change Weather",
+		"saved": "Game saved",
+		"save_failed": "Save failed",
+		"no_reports": "No reports registered yet",
+		"report_saved": "Patrol report registered",
+		"citizen_title": "Citizen Conversation",
+		"citizen_text": "A resident requests guidance and assistance. Listen respectfully and record the concern.",
+		"record": "Record Conversation",
+		"settings_title": "Game Settings",
+		"volume": "Environment Volume",
+		"mouse": "Camera Sensitivity",
+		"graphics": "Graphics Quality",
+		"graphics_low": "Low",
+		"graphics_high": "High",
+		"pause": "Game Paused",
+		"objective": "Mission Objective",
+		"no_active": "No active mission",
+		"station": "Police Station",
+		"district": "City District",
+		"vehicle": "Patrol Vehicle",
+		"on_foot": "Foot Patrol",
+		"weather_sunny": "Sunny",
+		"weather_cloudy": "Cloudy",
+		"weather_rain": "Rain",
+		"weather_fog": "Fog",
+		"mission_done": "Mission completed successfully",
+		"mission_received": "Mission accepted",
+		"no_mission": "No more missions available",
+		"distance": "Distance to objective",
+		"case": "Case ID"
+	}
+}
+
+func tr(key: String) -> String:
+	var dictionary: Dictionary = TEXTS.get(language, TEXTS["fa"])
+	return str(dictionary.get(key, key))
+
+func set_language(code: String) -> void:
+	if not TEXTS.has(code):
+		return
+	language = code
+	language_changed.emit(language)
+
+func toggle_language() -> void:
+	set_language("en" if language == "fa" else "fa")
