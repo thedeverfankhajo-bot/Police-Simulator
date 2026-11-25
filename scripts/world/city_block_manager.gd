@@ -69,9 +69,14 @@ func update_player_position(position: Vector3) -> void:
 
 func _distance_to_block(definition: CityBlockDefinition, player_xz: Vector2) -> float:
 	var nearest_distance := INF
+	var half_footprint := definition.footprint * 0.5
 	for building_position: Vector3 in definition.building_positions:
 		var building_xz := Vector2(building_position.x, building_position.z)
-		nearest_distance = minf(nearest_distance, player_xz.distance_to(building_xz))
+		var offset := player_xz - building_xz
+		var outside_x := maxf(absf(offset.x) - half_footprint.x, 0.0)
+		var outside_z := maxf(absf(offset.y) - half_footprint.y, 0.0)
+		var distance_to_footprint := Vector2(outside_x, outside_z).length()
+		nearest_distance = minf(nearest_distance, distance_to_footprint)
 	return nearest_distance
 
 func _spawn_block(definition: CityBlockDefinition) -> void:

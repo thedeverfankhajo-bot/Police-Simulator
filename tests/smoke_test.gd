@@ -9,6 +9,46 @@ func _initialize() -> void:
 	var instance := packed.instantiate()
 	root.add_child(instance)
 	await process_frame
+
+	# Streaming decisions must use the nearest building footprint edge, not its origin.
+	var block_manager := instance.get_node_or_null("CityBlockManager") as CityBlockManager
+	if block_manager == null:
+		push_error("Smoke test failed: CityBlockManager did not initialize.")
+		quit(1)
+		return
+	var streaming_probe := CityBlockDefinition.new()
+	streaming_probe.block_id = "TEST_STREAM_BOUNDS"
+	streaming_probe.district_id = "downtown"
+	streaming_probe.building_positions = PackedVector3Array([Vector3.ZERO])
+	streaming_probe.footprint = Vector2(20.0, 40.0)
+	streaming_probe.minimum_height = 8.0
+	streaming_probe.maximum_height = 16.0
+	streaming_probe.facade_palette = [Color.WHITE]
+	if not streaming_probe.is_valid_definition():
+		push_error("Smoke test failed: the city streaming footprint fixture is invalid.")
+		quit(1)
+		return
+	var inside_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(8.0, 18.0)))
+	var edge_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(15.0, 0.0)))
+	var outside_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(25.0, 0.0)))
+	var load_boundary_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(block_manager.load_radius + 5.0, 0.0)))
+	if not is_zero_approx(inside_distance):
+		push_error("Smoke test failed: a player inside a building footprint did not receive zero streaming distance.")
+		quit(1)
+		return
+	if not is_equal_approx(edge_distance, 5.0):
+		push_error("Smoke test failed: city streaming distance did not measure from the building footprint edge.")
+		quit(1)
+		return
+	if not is_equal_approx(outside_distance, 15.0):
+		push_error("Smoke test failed: city streaming distance outside the footprint is incorrect.")
+		quit(1)
+		return
+	if load_boundary_distance > block_manager.load_radius:
+		push_error("Smoke test failed: a large building entering the load radius was treated as outside.")
+		quit(1)
+		return
+
 	if instance.get_node_or_null("MissionManager") == null:
 		push_error("Smoke test failed: MissionManager did not initialize.")
 		quit(1)
