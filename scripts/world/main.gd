@@ -9,9 +9,9 @@ const WEATHER_SCRIPT = preload("res://scripts/environment/weather_controller.gd"
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic/traffic_manager.gd")
 const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.tscn")
 const CITY_BLOCK_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_block_manager.tscn")
-const CITY_ROAD_SEGMENT_SCENE: PackedScene = preload("res://scenes/city/city_road_segment.tscn")
-const TRAFFIC_SIGNAL_SCENE: PackedScene = preload("res://scenes/city/traffic_signal.tscn")
-const STREET_LIGHT_SCENE: PackedScene = preload("res://scenes/city/city_street_light.tscn")
+const CITY_ENVIRONMENT_BUILDER: Script = preload("res://scripts/world/city_environment_builder.gd")
+const CITY_ROAD_BUILDER: Script = preload("res://scripts/world/city_road_builder.gd")
+const CITY_BUILDING_BUILDER: Script = preload("res://scripts/world/city_building_builder.gd")
 
 var player: Variant
 var patrol_car: Variant
@@ -123,64 +123,17 @@ func _build_environment() -> void:
 	add_child(rain)
 
 func _build_city() -> void:
-	var grass := _mat(Color(0.17,0.29,0.19),0.98)
-	_box(self,Vector3(0,-0.28,0),Vector3(220,0.5,220),grass,true)
-	var navigation_region := NavigationRegion3D.new()
-	var navigation_mesh := NavigationMesh.new()
-	navigation_mesh.vertices = PackedVector3Array([Vector3(-105,0,-105),Vector3(105,0,-105),Vector3(105,0,105),Vector3(-105,0,105)])
-	navigation_mesh.add_polygon(PackedInt32Array([0,1,2,3]))
-	navigation_region.navigation_mesh = navigation_mesh
-	add_child(navigation_region)
-	for road in [-100.0, -50.0, 0.0, 50.0, 100.0]:
-		var width := 10.0 if road == 0.0 else 7.5
-		_add_road_segment(Vector3(road, 0.0, 0.0), width, CityRoadSegment.Axis.NORTH_SOUTH)
-		_add_road_segment(Vector3(0.0, 0.0, road), width, CityRoadSegment.Axis.EAST_WEST)
-
-	var park := _mat(Color(0.24,0.38,0.24),0.98)
-	_box(self,Vector3(-25,0.04,25),Vector3(37,0.18,37),park)
-	var concrete := _mat(Color(0.5,0.53,0.52),0.9)
-	_box(self,Vector3(-25,0.15,25),Vector3(2,0.2,31),concrete)
-	_box(self,Vector3(-25,0.16,25),Vector3(31,0.2,2),concrete)
-	_box(self,Vector3(-25,0.28,25),Vector3(5,0.22,5),_mat(Color(0.12,0.4,0.49),0.2))
-	for tree_pos in [Vector3(-38,0,11),Vector3(-13,0,11),Vector3(-38,0,39),Vector3(-13,0,39),Vector3(-25,0,8),Vector3(-8,0,25)]:
-		_tree(tree_pos)
-	_bench(Vector3(-31,0.2,25))
-	_bench(Vector3(-19,0.2,25))
-	_sign(Vector3(-25,2.4,6),"NORTH PARK",Color(0.3,0.6,0.39))
-
+	CITY_ENVIRONMENT_BUILDER.build(self)
+	CITY_ROAD_BUILDER.build(self)
 	city_block_manager = CITY_BLOCK_MANAGER_SCENE.instantiate() as CityBlockManager
 	if city_block_manager == null:
 		push_error("City block manager scene could not be instantiated.")
-	else:
-		city_block_manager.name = "CityBlockManager"
-		add_child(city_block_manager)
-	for p in [Vector3(0,0.2,0),Vector3(50,0.2,0),Vector3(-50,0.2,0),Vector3(0,0.2,50),Vector3(0,0.2,-50)]:
-		_traffic_light(p)
-	for p in [Vector3(-10,0,17),Vector3(10,0,17),Vector3(49,0,-16),Vector3(-49,0,16),Vector3(15,0,-50),Vector3(-15,0,50)]:
-		_street_lamp(p)
-	for p in [Vector3(12,0,12),Vector3(-12,0,-12),Vector3(58,0,-12),Vector3(-58,0,12)]:
-		_box(self,p+Vector3(0,0.5,0),Vector3(0.65,1,0.65),_mat(Color(0.12,0.24,0.25)))
+		return
+	city_block_manager.name = "CityBlockManager"
+	add_child(city_block_manager)
 
 func _build_station() -> void:
-	var wall := _mat(Color(0.57,0.62,0.64),0.82)
-	var trim := _mat(Color(0.055,0.14,0.22),0.54)
-	_box(self,Vector3(20,0.12,28),Vector3(25,0.28,24),_mat(Color(0.37,0.4,0.41)))
-	_box(self,Vector3(7.8,4,28),Vector3(0.8,8,24),wall,true)
-	_box(self,Vector3(32.2,4,28),Vector3(0.8,8,24),wall,true)
-	_box(self,Vector3(20,4,16),Vector3(25,8,0.8),wall,true)
-	_box(self,Vector3(12.1,3.8,40),Vector3(9.2,7.6,0.8),wall,true)
-	_box(self,Vector3(27.9,3.8,40),Vector3(9.2,7.6,0.8),wall,true)
-	_box(self,Vector3(20,0.25,15.6),Vector3(26,0.35,1.2),trim)
-	_box(self,Vector3(20,0.25,40.4),Vector3(26,0.35,1.2),trim)
-	_box(self,Vector3(20,7.9,28),Vector3(25,0.4,24),trim)
-	_sign(Vector3(20,6.2,15.1),"NORTH DISTRICT POLICE",Color(0.08,0.28,0.43))
-	_box(self,Vector3(20,1.5,20),Vector3(8,3,0.35),wall,true)
-	_box(self,Vector3(20,0.75,27),Vector3(4.2,1.25,1.5),trim)
-	_box(self,Vector3(20,1.55,27.3),Vector3(1.2,0.9,0.15),_mat(Color(0.04,0.11,0.14),0.25))
-	_box(self,Vector3(20,1.66,27.16),Vector3(1.06,0.72,0.04),_emission_material(Color(0.12,0.55,0.65)))
-	_box(self,Vector3(27,0.08,49),Vector3(30,0.18,18),_mat(Color(0.19,0.23,0.26)))
-	for x in [18.0,26.0,34.0]:
-		_box(self,Vector3(x,0.19,48),Vector3(0.14,0.04,11),_mat(Color(0.88,0.82,0.61)))
+	CITY_BUILDING_BUILDER.build_police_station(self)
 
 func _spawn_player() -> void:
 	player = PLAYER_SCRIPT.new()
@@ -469,35 +422,6 @@ func _district(p: Vector3) -> String:
 		return "ناحیه شمالی" if LocaleManager.language == "fa" else "North District"
 	return str(city_manager.call("get_district_label_at", p, LocaleManager.language))
 
-func _add_road_segment(world_position: Vector3, width: float, orientation: CityRoadSegment.Axis) -> void:
-	var segment := CITY_ROAD_SEGMENT_SCENE.instantiate() as CityRoadSegment
-	if segment == null:
-		push_error("City road segment scene could not be instantiated.")
-		return
-	segment.name = "RoadSegment_%s_%s" % [str(orientation), str(int(absf(world_position.x + world_position.z)))]
-	segment.position = world_position
-	segment.configure(width, 220.0, orientation)
-	add_child(segment)
-
-func _box(parent: Node3D, pos: Vector3, size: Vector3, material: Material, solid: bool = false) -> MeshInstance3D:
-	var mesh := MeshInstance3D.new()
-	var cube := BoxMesh.new()
-	cube.size = size
-	mesh.mesh = cube
-	mesh.material_override = material
-	mesh.position = pos
-	parent.add_child(mesh)
-	if solid:
-		var body := StaticBody3D.new()
-		body.position = pos
-		var collider := CollisionShape3D.new()
-		var shape := BoxShape3D.new()
-		shape.size = size
-		collider.shape = shape
-		body.add_child(collider)
-		parent.add_child(body)
-	return mesh
-
 func _mat(color: Color, roughness: float = 0.86) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
@@ -510,48 +434,3 @@ func _emission_material(color: Color) -> StandardMaterial3D:
 	material.emission = color
 	return material
 
-func _sign(pos: Vector3, value: String, tint: Color) -> void:
-	var label := Label3D.new()
-	label.text = value
-	label.font_size = 30
-	label.pixel_size = 0.008
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.modulate = tint.lightened(0.55)
-	label.position = pos
-	add_child(label)
-
-func _tree(pos: Vector3) -> void:
-	_box(self,pos+Vector3(0,1,0),Vector3(0.38,2,0.38),_mat(Color(0.23,0.15,0.09)))
-	var crown := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 1.45
-	sphere.height = 2.7
-	crown.mesh = sphere
-	crown.material_override = _mat(Color(0.14,0.3,0.17),0.94)
-	crown.position = pos+Vector3(0,2.65,0)
-	add_child(crown)
-
-func _bench(pos: Vector3) -> void:
-	var wood := _mat(Color(0.35,0.22,0.12),0.78)
-	var metal := _mat(Color(0.11,0.15,0.17),0.58)
-	_box(self,pos+Vector3(0,0.65,0),Vector3(2.1,0.14,0.52),wood)
-	_box(self,pos+Vector3(0,1.05,-0.2),Vector3(2.1,0.78,0.12),wood)
-	_box(self,pos+Vector3(-0.8,0.32,0),Vector3(0.14,0.7,0.48),metal)
-	_box(self,pos+Vector3(0.8,0.32,0),Vector3(0.14,0.7,0.48),metal)
-
-func _street_lamp(pos: Vector3) -> void:
-	var lamp := STREET_LIGHT_SCENE.instantiate() as CityStreetLight
-	if lamp == null:
-		push_error("City street light scene could not be instantiated.")
-		return
-	lamp.name = "StreetLight_%02d" % (get_tree().get_nodes_in_group("city_street_lamp_components").size() + 1)
-	lamp.position = pos
-	add_child(lamp)
-func _traffic_light(pos: Vector3) -> void:
-	var signal_node := TRAFFIC_SIGNAL_SCENE.instantiate() as TrafficSignalController
-	if signal_node == null:
-		push_error("Traffic signal scene could not be instantiated.")
-		return
-	signal_node.name = "TrafficSignal_%03d" % get_child_count()
-	signal_node.position = pos
-	add_child(signal_node)

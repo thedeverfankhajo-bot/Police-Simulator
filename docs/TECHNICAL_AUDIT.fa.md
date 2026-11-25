@@ -182,3 +182,14 @@
 - آزمون‌های ذخیره‌سازی عمداً payload نامعتبر و فایل JSON خراب را تولید می‌کنند؛ هشدارهای اعتبارسنجی مرتبط با همین سناریوهای منفیِ تست هستند.
 - هشدار `1 ObjectDB instance was leaked at exit` پس از پایان تست باقی مانده و علت آن در این مرحله تعیین نشده است.
 - این اجرای headless، صحت بصری، کیفیت Assetها، FPS، مصرف حافظه در جلسهٔ طولانی یا سازگاری سخت‌افزارهای مختلف را ارزیابی نمی‌کند.
+
+
+## رفع ObjectDB leak و تفکیک سازنده‌های شهر — 2026-11-25
+
+- اجرای Godot با --verbose روی CI، منبع دقیق هشدار را مشخص کرد: AudioStreamGeneratorPlayback با Reference Count برابر ۱؛ نشت از متغیر مرجع AudioManager._playback بود، نه از CityBlockManager یا سازنده‌های محیط.
+- در AudioManager._exit_tree() پخش متوقف و مرجع RefCounted مربوط به playback صریحاً آزاد می‌شود. نتیجهٔ رفع نشت تنها پس از بررسی لاگ verbose اجرای بعدی اعلام خواهد شد.
+- سازندهٔ محیط/پارک/Navigation به city_environment_builder.gd، شبکهٔ جاده/چراغ راهنمایی/چراغ خیابان به city_road_builder.gd و ساختمان ایستگاه پلیس به city_building_builder.gd منتقل شدند. هر سه Builder مستقل و مبتنی بر متدهای static هستند؛ بنابراین Node مدیریتی دائمی یا چرخهٔ عمر اضافی به Scene Tree اضافه نمی‌کنند.
+- main.gd اکنون فقط ترتیب ساخت و اتصال سیستم‌ها را مدیریت می‌کند؛ کاتالوگ داده‌محور بلوک‌ها همچنان در CityBlockManager باقی است.
+- Smoke test برای شمارش ۱۰ قطعه جاده، ۵ چراغ تقاطع، ۶ چراغ خیابان و حضور CityManager/CityBlockManager گسترش یافت.
+- Pipeline واردکردن Blender/glTF و دفتر ثبت مجوز در docs/ASSET_PIPELINE_AND_LICENSES.md تعریف شد. هیچ Asset شخص ثالثی اضافه نشده و مجوز تجاری هنوز تأیید نشده است.
+- این تغییرات باید با Import/Parse و Smoke Test verbose روی CI آزموده شوند؛ وضعیت موفقیت تا پایان Workflow اعلام نمی‌شود.

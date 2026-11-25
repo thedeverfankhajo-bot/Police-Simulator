@@ -50,3 +50,11 @@ func _process(_delta: float) -> void:
 			_phase -= TAU
 		var sample := sin(_phase) * amplitude
 		_playback.push_frame(Vector2(sample, sample))
+
+func _exit_tree() -> void:
+	# AudioStreamGeneratorPlayback is RefCounted; release our strong reference
+	# before the AudioStreamPlayer child is destroyed with this autoload.
+	if is_instance_valid(_player):
+		_player.stop()
+	_playback = null
+	_player = null

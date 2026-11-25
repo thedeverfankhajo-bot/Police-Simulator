@@ -10,6 +10,27 @@ func _initialize() -> void:
 	root.add_child(instance)
 	await process_frame
 
+	# World bootstrap delegates city construction to independent builders.
+	var road_segments := instance.get_tree().get_nodes_in_group("city_road_segments")
+	var traffic_signals := instance.get_tree().get_nodes_in_group("city_traffic_signals")
+	var street_lights := instance.get_tree().get_nodes_in_group("city_street_lights")
+	if road_segments.size() != 10:
+		push_error("Smoke test failed: modular road builder did not create ten road segments.")
+		quit(1)
+		return
+	if traffic_signals.size() != 5:
+		push_error("Smoke test failed: modular road builder did not create five traffic signals.")
+		quit(1)
+		return
+	if street_lights.size() != 6:
+		push_error("Smoke test failed: modular road builder did not create six street lights.")
+		quit(1)
+		return
+	if instance.get_node_or_null("CityBlockManager") == null or instance.get_node_or_null("CityManager") == null:
+		push_error("Smoke test failed: modular city bootstrap did not attach its city managers.")
+		quit(1)
+		return
+
 	# Streaming decisions must use the nearest building footprint edge, not its origin.
 	var streaming_manager := instance.get_node_or_null("CityBlockManager") as CityBlockManager
 	if streaming_manager == null:
