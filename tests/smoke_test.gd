@@ -381,6 +381,70 @@ func _initialize() -> void:
 		return
 	traffic_probe.free()
 
+	var traffic_signal_scene := load("res://scenes/city/traffic_signal.tscn") as PackedScene
+	if traffic_signal_scene == null:
+		push_error("Smoke test failed: reusable traffic signal scene could not be loaded.")
+		quit(1)
+		return
+	var signal_probe := traffic_signal_scene.instantiate()
+	if signal_probe == null or not signal_probe.has_method("should_stop_for"):
+		push_error("Smoke test failed: traffic signal controller was not attached.")
+		quit(1)
+		return
+	signal_probe.set("green_duration", 2.0)
+	signal_probe.set("amber_duration", 0.5)
+	signal_probe.set("all_red_duration", 0.25)
+	signal_probe.position = Vector3.ZERO
+	root.add_child(signal_probe)
+	await process_frame
+	if int(signal_probe.get("current_phase")) != 0:
+		push_error("Smoke test failed: a zero-offset signal did not start in its north-south green phase.")
+		quit(1)
+		return
+	if bool(signal_probe.call("should_stop_for", Vector3(0, 0, -8), Vector3.BACK)):
+		push_error("Smoke test failed: a green north-south approach was incorrectly stopped.")
+		quit(1)
+		return
+	if not bool(signal_probe.call("should_stop_for", Vector3(-8, 0, 0), Vector3.RIGHT)):
+		push_error("Smoke test failed: a red east-west approach was not stopped.")
+		quit(1)
+		return
+	if bool(signal_probe.call("should_stop_for", Vector3(10, 0, -8), Vector3.BACK)):
+		push_error("Smoke test failed: a vehicle outside the approach corridor was stopped.")
+		quit(1)
+		return
+	if bool(signal_probe.call("should_stop_for", Vector3(0, 0, 8), Vector3.BACK)):
+		push_error("Smoke test failed: a vehicle that had passed the intersection was stopped.")
+		quit(1)
+		return
+	signal_probe.set("current_phase", 3)
+	if bool(signal_probe.call("should_stop_for", Vector3(-8, 0, 0), Vector3.RIGHT)):
+		push_error("Smoke test failed: a green east-west approach was incorrectly stopped.")
+		quit(1)
+		return
+	if not bool(signal_probe.call("should_stop_for", Vector3(0, 0, -8), Vector3.BACK)):
+		push_error("Smoke test failed: a red north-south approach was not stopped.")
+		quit(1)
+		return
+	signal_probe.set("current_phase", 0)
+	signal_probe.set("_phase_elapsed", 0.0)
+	signal_probe.call("_process", 2.1)
+	if int(signal_probe.get("current_phase")) != 1:
+		push_error("Smoke test failed: the green phase did not transition to amber.")
+		quit(1)
+		return
+	signal_probe.call("_process", 0.6)
+	if int(signal_probe.get("current_phase")) != 2:
+		push_error("Smoke test failed: amber did not transition through all-red clearance.")
+		quit(1)
+		return
+	signal_probe.call("_process", 0.3)
+	if int(signal_probe.get("current_phase")) != 3:
+		push_error("Smoke test failed: the opposing green phase did not activate after all-red.")
+		quit(1)
+		return
+	signal_probe.queue_free()
+	await process_frame
 
 	# Legacy missions without objective_steps retain a safe default workflow.
 	var legacy_steps: Array = manager.call("get_objective_steps", valid_mission_probe)
@@ -530,5 +594,5 @@ func _initialize() -> void:
 	hud.call("close_panels")
 	instance.queue_free()
 	await process_frame
-	print("POLICE SIMULATOR 3D smoke test passed: world, managers, multi-stage missions, save recovery, district catalog, modular roads/buildings, traffic lane filtering, interactables, and UI overlays initialized.")
+	print("POLICE SIMULATOR 3D smoke test passed: world, managers, multi-stage missions, save recovery, district catalog, modular roads/buildings, traffic lane filtering, directional signal phases, interactables, and UI overlays initialized.")
 	quit(0)

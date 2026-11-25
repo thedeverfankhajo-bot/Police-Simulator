@@ -10,6 +10,7 @@ const TRAFFIC_SCRIPT = preload("res://scripts/traffic/traffic_manager.gd")
 const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.tscn")
 const CITY_BUILDING_SCENE: PackedScene = preload("res://scenes/city/city_building.tscn")
 const CITY_ROAD_SEGMENT_SCENE: PackedScene = preload("res://scenes/city/city_road_segment.tscn")
+const TRAFFIC_SIGNAL_SCENE: PackedScene = preload("res://scenes/city/traffic_signal.tscn")
 
 var player: Variant
 var patrol_car: Variant
@@ -22,10 +23,8 @@ var sun: DirectionalLight3D
 var environment_node: WorldEnvironment
 var rain: GPUParticles3D
 var objective_marker: Node3D
-var lights: Array[Node3D] = []
 var active_citizen: Node3D
 var driving := false
-var signal_clock := 0.0
 
 func _ready() -> void:
 	_build_environment()
@@ -44,14 +43,6 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	GameState.play_seconds += delta
-	signal_clock += delta
-	if signal_clock >= 12.0:
-		signal_clock = 0.0
-		for signal_node in lights:
-			signal_node.set_meta("red", not bool(signal_node.get_meta("red", true)))
-			var lamp := signal_node.get_node_or_null("Lamp") as MeshInstance3D
-			if lamp:
-				lamp.material_override = _emission_material(Color(0.15,0.8,0.34) if not bool(signal_node.get_meta("red")) else Color(0.9,0.1,0.08))
 	if rain and player:
 		rain.global_position = player.global_position + Vector3(0,10,0)
 	if is_instance_valid(city_manager):
@@ -577,18 +568,10 @@ func _street_lamp(pos: Vector3) -> void:
 	add_child(light)
 
 func _traffic_light(pos: Vector3) -> void:
-	var node := Node3D.new()
-	node.position = pos+Vector3(6,0,6)
-	node.set_meta("red",true)
-	node.add_to_group("traffic_lights")
-	_box(node,Vector3(0,3.1,0),Vector3(0.12,6.2,0.12),_mat(Color(0.08,0.1,0.11)))
-	var lamp := MeshInstance3D.new()
-	lamp.name = "Lamp"
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.24
-	lamp.mesh = sphere
-	lamp.material_override = _emission_material(Color(0.9,0.1,0.08))
-	lamp.position.y = 5.85
-	node.add_child(lamp)
-	add_child(node)
-	lights.append(node)
+	var signal_node := TRAFFIC_SIGNAL_SCENE.instantiate() as TrafficSignalController
+	if signal_node == null:
+		push_error("Traffic signal scene could not be instantiated.")
+		return
+	signal_node.name = "TrafficSignal_%03d" % get_child_count()
+	signal_node.position = pos
+	add_child(signal_node)

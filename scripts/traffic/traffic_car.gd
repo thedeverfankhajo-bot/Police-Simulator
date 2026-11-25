@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 		offset = target - global_position
 		offset.y = 0.0
 	var direction := offset.normalized()
-	_stopped = _nearby_vehicle_ahead(direction) or _red_light_nearby(global_position)
+	_stopped = _nearby_vehicle_ahead(direction) or _red_light_nearby(global_position, direction)
 	var speed := 0.0 if _stopped else cruise_speed
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
@@ -95,8 +95,10 @@ func _nearby_vehicle_ahead(forward: Vector3) -> bool:
 			return true
 	return false
 
-func _red_light_nearby(point: Vector3) -> bool:
+func _red_light_nearby(point: Vector3, forward: Vector3) -> bool:
 	for light in get_tree().get_nodes_in_group("traffic_lights"):
-		if is_instance_valid(light) and light.global_position.distance_to(point) < 8.0:
-			return bool(light.get_meta("red", false))
+		if not is_instance_valid(light) or not light.has_method("should_stop_for"):
+			continue
+		if bool(light.call("should_stop_for", point, forward)):
+			return true
 	return false
