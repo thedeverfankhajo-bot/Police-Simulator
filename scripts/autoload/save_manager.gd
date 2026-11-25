@@ -1,7 +1,16 @@
 extends Node
 
 const SAVE_PATH := "user://police_simulator_save.json"
+extends Node
+
+const SAVE_PATH := "user://police_simulator_save.json"
 const SAVE_VERSION := 1
+const POSITION_SANITIZER_SCRIPT: Script = preload("res://scripts/core/save_position_sanitizer.gd")
+
+var _position_sanitizer: RefCounted
+
+func _init() -> void:
+	_position_sanitizer = POSITION_SANITIZER_SCRIPT.new()
 
 func save_game(player_position: Vector3) -> bool:
 	var payload := {
@@ -58,15 +67,5 @@ func saved_position(data: Dictionary, fallback: Vector3) -> Vector3:
 	return Vector3(safe_position[0], safe_position[1], safe_position[2])
 
 func sanitize_position_data(position_data: Variant, fallback: Vector3) -> Array[float]:
-	var safe_position: Array[float] = [fallback.x, fallback.y, fallback.z]
-	if not position_data is Array or position_data.size() != 3:
-		return safe_position
-	for axis: int in range(3):
-		var coordinate: Variant = position_data[axis]
-		if not (coordinate is int or coordinate is float):
-			return safe_position
-		var value := float(coordinate)
-		if not is_finite(value):
-			return safe_position
-		safe_position[axis] = clampf(value, -95.0, 95.0)
+	var safe_position: Array[float] = _position_sanitizer.call("sanitize_position_data", position_data, fallback)
 	return safe_position
