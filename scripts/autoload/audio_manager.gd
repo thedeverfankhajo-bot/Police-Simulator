@@ -52,9 +52,16 @@ func _process(_delta: float) -> void:
 		_playback.push_frame(Vector2(sample, sample))
 
 func _exit_tree() -> void:
-	# AudioStreamGeneratorPlayback is RefCounted; release our strong reference
-	# before the AudioStreamPlayer child is destroyed with this autoload.
-	if is_instance_valid(_player):
-		_player.stop()
-	_playback = null
+	# The generator playback is retained by AudioStreamPlayer as well as this
+	# script. Stop it, detach its stream, and free the player before releasing
+	# the script's final strong reference to AudioStreamGeneratorPlayback.
+	var player_to_release := _player
 	_player = null
+	if is_instance_valid(player_to_release):
+		player_to_release.stop()
+		player_to_release.stream = null
+		_playback = null
+		remove_child(player_to_release)
+		player_to_release.free()
+	else:
+		_playback = null
