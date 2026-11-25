@@ -40,6 +40,22 @@ func _initialize() -> void:
 		push_error("Smoke test failed: public park district lookup failed.")
 		quit(1)
 		return
+	if str(city_manager.call("get_district_id_at", Vector3(45, 0, -72))) != "civic_services":
+		push_error("Smoke test failed: higher-priority civic services district did not win an overlap.")
+		quit(1)
+		return
+	if str(city_manager.call("get_district_id_at", Vector3(-45, 0, 25))) != "public_park":
+		push_error("Smoke test failed: higher-priority public park district did not win an overlap.")
+		quit(1)
+		return
+	if str(city_manager.call("get_district_label_at", Vector3(45, 0, -72), "en")) != "Civic Services":
+		push_error("Smoke test failed: English district labels were not resolved.")
+		quit(1)
+		return
+	if str(city_manager.call("get_district_id_at", Vector3(300, 0, 300))) != "":
+		push_error("Smoke test failed: an out-of-bounds position matched a city district.")
+		quit(1)
+		return
 	var interactables := instance.get_tree().get_nodes_in_group("interactables")
 	if interactables.size() < 9:
 		push_error("Smoke test failed: player services, vehicle, or citizens were not registered.")
@@ -60,5 +76,5 @@ func _initialize() -> void:
 	hud.call("close_panels")
 	instance.queue_free()
 	await process_frame
-	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, interactables, and map/pause overlays initialized.")
+	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, district catalog priority/overlap, interactables, and map/pause overlays initialized.")
 	quit(0)
