@@ -3,7 +3,7 @@ extends Node3D
 
 const BUILDING_SCENE: PackedScene = preload("res://scenes/city/city_building.tscn")
 
-@export var block_catalog: Array[CityBlockDefinition] = []
+@export var block_catalog: CityBlockCatalog
 
 var _block_count: int = 0
 var _building_count: int = 0
@@ -13,8 +13,12 @@ func _ready() -> void:
 	_build_catalog()
 
 func _build_catalog() -> void:
+	if block_catalog == null:
+		push_error("City block catalog is not assigned.")
+		return
+
 	var seen_block_ids: Dictionary = {}
-	for definition: CityBlockDefinition in block_catalog:
+	for definition: CityBlockDefinition in block_catalog.blocks:
 		if definition == null or not definition.is_valid_definition():
 			push_warning("Skipping an invalid city block definition.")
 			continue

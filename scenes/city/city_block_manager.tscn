@@ -5,4 +5,4 @@
 
 [node name="CityBlockManager" type="Node3D"]
 script = ExtResource("1")
-block_catalog = Array[ExtResource("1")]([ExtResource("2")])
+block_catalog = ExtResource("2")
