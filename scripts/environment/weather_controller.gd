@@ -13,15 +13,15 @@ var fog_density: float = 0.003
 var surface_wetness: float = 0.0
 var _target_surface_wetness: float = 0.0
 
-func _ready() -> void:
-	add_to_group("weather_managers")
-
 const WEATHER := [
 	{"name":"sunny","key":"weather_sunny","energy":1.05,"fog":0.001,"rain":false,"wetness":0.0},
 	{"name":"cloudy","key":"weather_cloudy","energy":0.72,"fog":0.004,"rain":false,"wetness":0.08},
 	{"name":"rain","key":"weather_rain","energy":0.48,"fog":0.012,"rain":true,"wetness":0.94},
 	{"name":"fog","key":"weather_fog","energy":0.38,"fog":0.028,"rain":false,"wetness":0.28}
 ]
+
+func _ready() -> void:
+	add_to_group("weather_managers")
 
 func configure(light: DirectionalLight3D, world: WorldEnvironment, particles: GPUParticles3D) -> void:
 	sun = light
@@ -30,9 +30,9 @@ func configure(light: DirectionalLight3D, world: WorldEnvironment, particles: GP
 	_apply_weather()
 
 func _process(delta: float) -> void:
-	elapsed += delta
 	if not is_finite(delta) or delta <= 0.0:
 		return
+	elapsed += delta
 	day_time = fposmod(day_time + delta * 0.025, 24.0)
 	var next_wetness := move_toward(surface_wetness, _target_surface_wetness, wetness_transition_speed * delta)
 	if not is_equal_approx(next_wetness, surface_wetness):
