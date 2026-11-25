@@ -69,6 +69,28 @@ func _initialize() -> void:
 			push_error("Smoke test failed: an invalid mission definition was accepted.")
 			quit(1)
 			return
+	var fallback_spawn := Vector3(20.0, 0.0, 28.0)
+	var clamped_position: Array[float] = SaveManager.sanitize_position_data([120.0, 1.5, -130.0], fallback_spawn)
+	if not is_equal_approx(clamped_position[0], 95.0) or not is_equal_approx(clamped_position[1], 1.5) or not is_equal_approx(clamped_position[2], -95.0):
+		push_error("Smoke test failed: saved coordinates were not clamped to world bounds.")
+		quit(1)
+		return
+	var non_finite_position: Array[float] = SaveManager.sanitize_position_data([INF, 0.0, 0.0], fallback_spawn)
+	if not is_equal_approx(non_finite_position[0], fallback_spawn.x) or not is_equal_approx(non_finite_position[1], fallback_spawn.y) or not is_equal_approx(non_finite_position[2], fallback_spawn.z):
+		push_error("Smoke test failed: non-finite saved coordinates did not use the safe spawn.")
+		quit(1)
+		return
+	var malformed_position: Array[float] = SaveManager.sanitize_position_data([1.0, "invalid", 3.0], fallback_spawn)
+	if not is_equal_approx(malformed_position[0], fallback_spawn.x) or not is_equal_approx(malformed_position[1], fallback_spawn.y) or not is_equal_approx(malformed_position[2], fallback_spawn.z):
+		push_error("Smoke test failed: malformed saved coordinates did not use the safe spawn.")
+		quit(1)
+		return
+	var restored_position: Vector3 = SaveManager.saved_position({"player_position": [3.0, 2.0, -4.0]}, fallback_spawn)
+	if not restored_position.is_equal_approx(Vector3(3.0, 2.0, -4.0)):
+		push_error("Smoke test failed: valid saved coordinates were not restored.")
+		quit(1)
+		return
+
 	var city_manager: Node = instance.get_node_or_null("CityManager")
 	if city_manager == null or int(city_manager.call("get_district_count")) != 7:
 		push_error("Smoke test failed: the seven city district resources did not load.")
@@ -149,5 +171,5 @@ func _initialize() -> void:
 	hud.call("close_panels")
 	instance.queue_free()
 	await process_frame
-	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, district catalog, traffic lane filtering, interactables, and UI overlays initialized.")
+	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, save-position sanitization, district catalog, traffic lane filtering, interactables, and UI overlays initialized.")
 	quit(0)

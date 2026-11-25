@@ -45,18 +45,8 @@ func load_game() -> Dictionary:
 	if int(data.get("version", -1)) != SAVE_VERSION:
 		push_warning("Unsupported save version; starting a new patrol.")
 		return {}
-	var position_data: Variant = data.get("player_position", [20.0, 0.0, 28.0])
-	if not position_data is Array or position_data.size() != 3:
-		data["player_position"] = [20.0, 0.0, 28.0]
-	else:
-		var safe_position: Array = []
-		for value: Variant in position_data:
-			if not (value is int or value is float):
-				safe_position = [20.0, 0.0, 28.0]
-				break
-			safe_position.append(clampf(float(value), -95.0, 95.0))
-		if safe_position.size() == 3:
-			data["player_position"] = safe_position
+	var position_data: Variant = data.get("player_position", [])
+	data["player_position"] = sanitize_position_data(position_data, Vector3(20.0, 0.0, 28.0))
 	GameState.apply_save(data)
 	AudioManager.master_volume = clampf(float(data.get("audio_volume", AudioManager.master_volume)), 0.0, 1.0)
 	var saved_language := str(data.get("language", "fa"))
@@ -64,7 +54,19 @@ func load_game() -> Dictionary:
 	return data
 
 func saved_position(data: Dictionary, fallback: Vector3) -> Vector3:
-	var value: Variant = data.get("player_position", [])
-	if value is Array and value.size() == 3:
-		return Vector3(float(value[0]), float(value[1]), float(value[2]))
-	return fallback
+	var safe_position: Array[float] = sanitize_position_data(data.get("player_position", []), fallback)
+	return Vector3(safe_position[0], safe_position[1], safe_position[2])
+
+func sanitize_position_data(position_data: Variant, fallback: Vector3) -> Array[float]:
+	var safe_position: Array[float] = [fallback.x, fallback.y, fallback.z]
+	if not position_data is Array or position_data.size() != 3:
+		return safe_position
+	for axis: int in range(3):
+		var coordinate: Variant = position_data[axis]
+		if not (coordinate is int or coordinate is float):
+			return safe_position
+		var value := float(coordinate)
+		if not is_finite(value):
+			return safe_position
+		safe_position[axis] = clampf(value, -95.0, 95.0)
+	return safe_position
