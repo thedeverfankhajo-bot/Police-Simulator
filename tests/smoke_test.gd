@@ -13,7 +13,7 @@ func _initialize() -> void:
 	# World bootstrap delegates city construction to independent builders.
 	var road_segments := instance.get_tree().get_nodes_in_group("city_road_segments")
 	var traffic_signals := instance.get_tree().get_nodes_in_group("city_traffic_signals")
-	var street_lights := instance.get_tree().get_nodes_in_group("city_street_lights")
+	var modular_street_lights := instance.get_tree().get_nodes_in_group("city_street_lights")
 	if road_segments.size() != 10:
 		push_error("Smoke test failed: modular road builder did not create ten road segments.")
 		quit(1)
@@ -22,7 +22,7 @@ func _initialize() -> void:
 		push_error("Smoke test failed: modular road builder did not create five traffic signals.")
 		quit(1)
 		return
-	if street_lights.size() != 6:
+	if modular_street_lights.size() != 6:
 		push_error("Smoke test failed: modular road builder did not create six street lights.")
 		quit(1)
 		return

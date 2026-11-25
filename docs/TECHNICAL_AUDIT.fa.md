@@ -193,3 +193,6 @@
 - Smoke test برای شمارش ۱۰ قطعه جاده، ۵ چراغ تقاطع، ۶ چراغ خیابان و حضور CityManager/CityBlockManager گسترش یافت.
 - Pipeline واردکردن Blender/glTF و دفتر ثبت مجوز در docs/ASSET_PIPELINE_AND_LICENSES.md تعریف شد. هیچ Asset شخص ثالثی اضافه نشده و مجوز تجاری هنوز تأیید نشده است.
 - این تغییرات باید با Import/Parse و Smoke Test verbose روی CI آزموده شوند؛ وضعیت موفقیت تا پایان Workflow اعلام نمی‌شود.
+
+
+- اجرای اول پس از استخراج Builderها: Import/Parse موفق بود؛ Smoke Test در Parse به‌علت برخورد نام متغیر محلی street_lights با متغیر هم‌نام موجود در همان تابع متوقف شد. متغیر آزمون جدید به modular_street_lights تغییر نام داده شد؛ نتیجهٔ تست مجدد هنوز تأیید نشده است.
