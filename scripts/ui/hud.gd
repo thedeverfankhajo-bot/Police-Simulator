@@ -71,7 +71,7 @@ func _build() -> void:
 	left_col.add_child(hud_position)
 	hud_distance = _label("فاصله تا هدف: —", 12, Color(0.75, 0.82, 0.87))
 	left_col.add_child(hud_distance)
-	hud_mission = _label(LocaleManager.tr("mission_none"), 15, Color(0.95, 0.79, 0.43))
+	hud_mission = _label(LocaleManager.translate("mission_none"), 15, Color(0.95, 0.79, 0.43))
 	hud_mission.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	left_col.add_child(hud_mission)
 	left_col.add_child(_label("WASD حرکت  •  Shift دویدن", 11, Color(0.58, 0.68, 0.76)))
@@ -147,7 +147,7 @@ func _build() -> void:
 	var dialog_col := VBoxContainer.new()
 	dialogue.add_child(dialog_col)
 	dialog_col.add_child(_label("CITIZEN SERVICES  /  گفت‌وگو", 14, Color(0.43, 0.77, 0.93)))
-	var dialog_copy := _label(LocaleManager.tr("citizen_text"), 17)
+	var dialog_copy := _label(LocaleManager.translate("citizen_text"), 17)
 	_dialog_copy = dialog_copy
 	dialog_copy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	dialog_col.add_child(dialog_copy)
@@ -190,7 +190,7 @@ func _label(value: String, size: int = 14, tint: Color = Color(0.83, 0.88, 0.92)
 
 func _action(parent: Control, key: String, callback: Callable) -> void:
 	var button := Button.new()
-	button.text = LocaleManager.tr(key)
+	button.text = LocaleManager.translate(key)
 	button.set_meta("translation_key", key)
 	button.add_to_group("localized_buttons")
 	button.custom_minimum_size = Vector2(0, 32)
@@ -202,11 +202,11 @@ func _action(parent: Control, key: String, callback: Callable) -> void:
 	parent.add_child(button)
 
 func update_hud(speed: float, mission_name: String, district: String, clock_text: String, distance: float, driving: bool, world_position: Vector3) -> void:
-	hud_speed.text = "%.0f km/h" % speed if driving else LocaleManager.tr("on_foot")
-	hud_mission.text = mission_name if mission_name != "" else LocaleManager.tr("mission_none")
+	hud_speed.text = "%.0f km/h" % speed if driving else LocaleManager.translate("on_foot")
+	hud_mission.text = mission_name if mission_name != "" else LocaleManager.translate("mission_none")
 	hud_clock.text = clock_text
 	hud_position.text = "GPS: X %.0f  /  Z %.0f" % [world_position.x, world_position.z]
-	hud_distance.text = "%s: %.0f m" % [LocaleManager.tr("distance"), distance] if distance >= 0.0 else "%s: —" % LocaleManager.tr("distance")
+	hud_distance.text = "%s: %.0f m" % [LocaleManager.translate("distance"), distance] if distance >= 0.0 else "%s: —" % LocaleManager.translate("distance")
 
 func set_prompt(value: String) -> void:
 	hud_prompt.text = value
@@ -214,13 +214,13 @@ func set_prompt(value: String) -> void:
 func show_dispatch(mission: Dictionary) -> void:
 	_overlay_kind = ""
 	if mission.is_empty():
-		dispatch_title.text = LocaleManager.tr("no_mission")
-		dispatch_description.text = LocaleManager.tr("mission_none")
+		dispatch_title.text = LocaleManager.translate("no_mission")
+		dispatch_description.text = LocaleManager.translate("mission_none")
 	else:
 		var title_key := "title_en" if LocaleManager.language == "en" else "title_fa"
 		var description_key := "description_en" if LocaleManager.language == "en" else "description_fa"
 		dispatch_title.text = str(mission.get(title_key, mission.get("id", "")))
-		dispatch_description.text = "%s\n\n%s: %s\nپاداش: %d XP" % [str(mission.get(description_key, "")), LocaleManager.tr("case"), str(mission.get("id", "")), int(mission.get("reward", 0))]
+		dispatch_description.text = "%s\n\n%s: %s\nپاداش: %d XP" % [str(mission.get(description_key, "")), LocaleManager.translate("case"), str(mission.get("id", "")), int(mission.get("reward", 0))]
 	dispatch_panel.visible = true
 	overlay.visible = false
 	_set_mouse(true)
@@ -246,23 +246,23 @@ func _show_overlay(kind: String) -> void:
 	var body := ""
 	match kind:
 		"map":
-			title = LocaleManager.tr("map")
+			title = LocaleManager.translate("map")
 			body = "[color=#7fc6dc]NORTH DISTRICT[/color]\n\n┌──────────────┬──────────────┐\n│ RESIDENTIAL  │ COMMERCIAL   │\n├────── MAIN BOULEVARD ──────┤\n│ PUBLIC PARK  │ INDUSTRIAL   │\n├──────────────┼──────────────┤\n│        POLICE STATION       │\n└────────────────────────────┘\n\nنقشهٔ شماتیک محله‌ها و بلوار اصلی"
 		"reports":
-			title = LocaleManager.tr("reports")
+			title = LocaleManager.translate("reports")
 			if GameState.reports.is_empty():
-				body = LocaleManager.tr("no_reports")
+				body = LocaleManager.translate("no_reports")
 			else:
 				for report in GameState.reports:
 					body += "[b]%s[/b]  •  %s\n%s\nنتیجه: %s\n\n" % [str(report.get("case_id", "")), str(report.get("event_type", "")), str(report.get("description", "")), str(report.get("result", ""))]
 		"profile":
-			title = LocaleManager.tr("profile")
-			body = "%s: %d\n%s: %d\n%s: %d%%\n%s: %d\nامتیاز: %d" % [LocaleManager.tr("level"), GameState.level, LocaleManager.tr("xp"), GameState.experience, LocaleManager.tr("trust"), GameState.public_trust, LocaleManager.tr("missions"), GameState.missions_completed, GameState.score]
+			title = LocaleManager.translate("profile")
+			body = "%s: %d\n%s: %d\n%s: %d%%\n%s: %d\nامتیاز: %d" % [LocaleManager.translate("level"), GameState.level, LocaleManager.translate("xp"), GameState.experience, LocaleManager.translate("trust"), GameState.public_trust, LocaleManager.translate("missions"), GameState.missions_completed, GameState.score]
 		"pause":
-			title = LocaleManager.tr("pause")
-			body = LocaleManager.tr("pause_message")
+			title = LocaleManager.translate("pause")
+			body = LocaleManager.translate("pause_message")
 		"settings":
-			title = LocaleManager.tr("settings_title")
+			title = LocaleManager.translate("settings_title")
 			body = "Graphics: Balanced\nAudio: Procedural patrol engine tone\nControls: WASD / Mouse / E\nAccessibility: فارسی / English"
 	overlay_title.text = title
 	overlay_body.text = body
@@ -290,7 +290,7 @@ func _set_mouse(open: bool) -> void:
 
 func _refresh_stats() -> void:
 	if is_instance_valid(hud_trust):
-		hud_trust.text = "%s: %d%%" % [LocaleManager.tr("trust"), GameState.public_trust]
+		hud_trust.text = "%s: %d%%" % [LocaleManager.translate("trust"), GameState.public_trust]
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
@@ -308,6 +308,6 @@ func _refresh_language(_code: String) -> void:
 		_root.layout_direction = Control.LAYOUT_DIRECTION_RTL if LocaleManager.language == "fa" else Control.LAYOUT_DIRECTION_LTR
 	for item in get_tree().get_nodes_in_group("localized_buttons"):
 		if is_instance_valid(item) and item is Button:
-			item.text = LocaleManager.tr(str(item.get_meta("translation_key", "")))
+			item.text = LocaleManager.translate(str(item.get_meta("translation_key", "")))
 	if is_instance_valid(_dialog_copy):
-		_dialog_copy.text = LocaleManager.tr("citizen_text")
+		_dialog_copy.text = LocaleManager.translate("citizen_text")

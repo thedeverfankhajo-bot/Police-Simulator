@@ -294,7 +294,7 @@ func _update_hud() -> void:
 		var title_key := "title_en" if LocaleManager.language == "en" else "title_fa"
 		mission_text = str(missions.active_mission.get(title_key,""))
 		distance = _current_position().distance_to(_mission_target())
-	var speed := patrol_car.get_speed() if driving else 0.0
+	var speed: float = float(patrol_car.get_speed()) if driving else 0.0
 	var time_value: float = weather.day_time
 	var hour := int(time_value)
 	var minute := int((time_value-float(hour))*60.0)
@@ -306,7 +306,7 @@ func _update_prompt() -> void:
 		return
 	var nearest := _nearest_interactable(3.6)
 	if nearest:
-		hud.set_prompt(str(nearest.get_meta("prompt",LocaleManager.tr("interact"))))
+		hud.set_prompt(str(nearest.get_meta("prompt",LocaleManager.translate("interact"))))
 	elif missions.active and missions.is_near_objective(player.global_position,4.0):
 		hud.set_prompt("E بررسی محل و تکمیل هدف")
 	else:
@@ -332,7 +332,7 @@ func _interact() -> void:
 		var result: Dictionary = missions.complete_active_mission(player.global_position)
 		if not result.is_empty():
 			_clear_marker()
-			hud.show_notification(LocaleManager.tr("mission_done"))
+			hud.show_notification(LocaleManager.translate("mission_done"))
 			_save_game()
 		return
 	hud.show_notification("مورد تعاملی نزدیکی پیدا نشد")
@@ -356,10 +356,10 @@ func _accept_mission() -> void:
 	if missions.accept_next_mission():
 		_create_marker()
 		hud.close_panels()
-		hud.show_notification(LocaleManager.tr("mission_received"))
+		hud.show_notification(LocaleManager.translate("mission_received"))
 	else:
 		hud.show_dispatch({})
-		hud.show_notification(LocaleManager.tr("no_mission"))
+		hud.show_notification(LocaleManager.translate("no_mission"))
 
 func _mission_target() -> Vector3:
 	if not missions.active:
@@ -419,7 +419,7 @@ func _register_patrol_report() -> void:
 		"result":"logged",
 		"timestamp":Time.get_datetime_string_from_system()
 	})
-	hud.show_notification(LocaleManager.tr("report_saved"))
+	hud.show_notification(LocaleManager.translate("report_saved"))
 
 func _record_citizen_contact() -> void:
 	if is_instance_valid(active_citizen):
@@ -437,12 +437,15 @@ func _record_citizen_contact() -> void:
 	})
 	hud.show_notification("درخواست شهروند ثبت شد")
 
+func _mission_completed(_mission: Dictionary, _report: Dictionary) -> void:
+	_clear_marker()
+
 func _report_added(_report: Dictionary) -> void:
 	pass
 
 func _save_game() -> void:
 	var success := SaveManager.save_game(_current_position())
-	hud.show_notification(LocaleManager.tr("saved") if success else LocaleManager.tr("save_failed"))
+	hud.show_notification(LocaleManager.translate("saved") if success else LocaleManager.translate("save_failed"))
 
 func _cycle_weather() -> void:
 	weather.cycle_weather()

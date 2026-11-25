@@ -125,7 +125,7 @@ const TEXTS := {
 	}
 }
 
-func tr(key: String) -> String:
+func translate(key: String) -> String:
 	var dictionary: Dictionary = TEXTS.get(language, TEXTS["fa"])
 	return str(dictionary.get(key, key))
 
