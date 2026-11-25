@@ -1,9 +1,6 @@
 extends Node
 
 const SAVE_PATH := "user://police_simulator_save.json"
-extends Node
-
-const SAVE_PATH := "user://police_simulator_save.json"
 const SAVE_VERSION := 1
 const POSITION_SANITIZER_SCRIPT: Script = preload("res://scripts/core/save_position_sanitizer.gd")
 
