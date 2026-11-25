@@ -122,6 +122,11 @@ func set_control_enabled(enabled: bool) -> void:
 		camera.current = enabled
 	visible = enabled
 
+func set_camera_sensitivity(value: float) -> void:
+	if not is_finite(value):
+		return
+	camera_sensitivity = clampf(value, 0.001, 0.006)
+
 func get_active_camera() -> Camera3D:
 	return camera
 

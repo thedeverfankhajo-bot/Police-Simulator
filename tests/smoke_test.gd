@@ -776,6 +776,98 @@ func _initialize() -> void:
 		quit(1)
 		return
 	hud.call("close_panels")
+
+	# Runtime graphics and input settings must apply and survive a ConfigFile round trip.
+	var settings_manager: Node = root.get_node_or_null("SettingsManager")
+	if settings_manager == null:
+		push_error("Smoke test failed: SettingsManager autoload was not found.")
+		quit(1)
+		return
+	var original_quality := str(settings_manager.get("graphics_quality"))
+	var original_sensitivity := float(settings_manager.get("sensitivity_scale"))
+	var root_viewport := get_root().get_viewport()
+	var sun_light := instance.get_node_or_null("DirectionalLight3D") as DirectionalLight3D
+	var officer := instance.get_node_or_null("PlayerOfficer")
+	var patrol_vehicle := instance.get_node_or_null("PatrolSedan")
+	if sun_light == null or officer == null or patrol_vehicle == null:
+		push_error("Smoke test failed: graphics or camera targets were not registered in the world.")
+		quit(1)
+		return
+	if not bool(settings_manager.call("set_graphics_quality", "performance")):
+		push_error("Smoke test failed: the performance graphics profile could not be applied.")
+		quit(1)
+		return
+	if not is_equal_approx(root_viewport.scaling_3d_scale, 0.82) or sun_light.shadow_enabled:
+		push_error("Smoke test failed: performance profile did not lower render scale and disable sun shadows.")
+		quit(1)
+		return
+	if not bool(settings_manager.call("set_graphics_quality", "balanced")):
+		push_error("Smoke test failed: the balanced graphics profile could not be applied.")
+		quit(1)
+		return
+	if not is_equal_approx(root_viewport.scaling_3d_scale, 1.0) or not sun_light.shadow_enabled:
+		push_error("Smoke test failed: balanced profile did not restore native render scale and sun shadows.")
+		quit(1)
+		return
+	if not bool(settings_manager.call("set_graphics_quality", "quality")):
+		push_error("Smoke test failed: the high-quality graphics profile could not be applied.")
+		quit(1)
+		return
+	if not is_equal_approx(root_viewport.scaling_3d_scale, 1.12):
+		push_error("Smoke test failed: high-quality profile did not enable the configured supersampling scale.")
+		quit(1)
+		return
+	if bool(settings_manager.call("set_graphics_quality", "ultra")):
+		push_error("Smoke test failed: an unknown graphics profile was accepted.")
+		quit(1)
+		return
+	if not bool(settings_manager.call("set_sensitivity_scale", 1.25)):
+		push_error("Smoke test failed: camera sensitivity scale could not be changed.")
+		quit(1)
+		return
+	if not is_equal_approx(float(officer.get("camera_sensitivity")), 0.003125):
+		push_error("Smoke test failed: officer camera sensitivity was not updated.")
+		quit(1)
+		return
+	if not is_equal_approx(float(patrol_vehicle.get("camera_sensitivity")), 0.00275):
+		push_error("Smoke test failed: patrol vehicle camera sensitivity was not updated.")
+		quit(1)
+		return
+	if bool(settings_manager.call("set_sensitivity_scale", INF)):
+		push_error("Smoke test failed: non-finite camera sensitivity was accepted.")
+		quit(1)
+		return
+	var settings_test_path := "user://police_simulator_settings_smoke.cfg"
+	if not bool(settings_manager.call("save_settings", settings_test_path)):
+		push_error("Smoke test failed: graphics settings could not be written to ConfigFile.")
+		quit(1)
+		return
+	settings_manager.call("set_graphics_quality", "performance")
+	settings_manager.call("set_sensitivity_scale", 0.75)
+	if not bool(settings_manager.call("load_settings", settings_test_path)):
+		push_error("Smoke test failed: saved graphics settings could not be loaded.")
+		quit(1)
+		return
+	if str(settings_manager.get("graphics_quality")) != "quality" or not is_equal_approx(float(settings_manager.get("sensitivity_scale")), 1.25):
+		push_error("Smoke test failed: graphics settings did not survive a ConfigFile round trip.")
+		quit(1)
+		return
+	if not bool(settings_manager.call("set_graphics_quality", original_quality)):
+		push_error("Smoke test failed: original graphics quality could not be restored.")
+		quit(1)
+		return
+	if not bool(settings_manager.call("set_sensitivity_scale", original_sensitivity)):
+		push_error("Smoke test failed: original camera sensitivity could not be restored.")
+		quit(1)
+		return
+	var settings_test_absolute_path := ProjectSettings.globalize_path(settings_test_path)
+	if FileAccess.file_exists(settings_test_path):
+		var settings_cleanup_error := DirAccess.remove_absolute(settings_test_absolute_path)
+		if settings_cleanup_error != OK:
+			push_error("Smoke test failed: temporary settings test file could not be removed.")
+			quit(1)
+			return
+
 	instance.queue_free()
 	await process_frame
 	print("POLICE SIMULATOR 3D smoke test passed: world, managers, multi-stage missions, save recovery, district catalog, modular roads/buildings, traffic lane filtering, directional signal phases, interactables, and UI overlays initialized.")

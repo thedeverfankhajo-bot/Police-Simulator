@@ -26,6 +26,11 @@ var overlay_body: RichTextLabel
 var dialogue: PanelContainer
 var _overlay_content: VBoxContainer
 var _volume_slider: HSlider
+var _graphics_label: Label
+var _graphics_option: OptionButton
+var _settings_hint: Label
+var _sensitivity_label: Label
+var _sensitivity_slider: HSlider
 var _dialog_copy: Label
 var _root: Control
 var paused: bool = false
@@ -128,7 +133,7 @@ func _build() -> void:
 	overlay_body.bbcode_enabled = true
 	overlay_body.fit_content = true
 	overlay_body.scroll_active = true
-	overlay_body.custom_minimum_size = Vector2(0, 250)
+	overlay_body.custom_minimum_size = Vector2(0, 150)
 	overlay_body.add_theme_color_override("default_color", Color(0.82, 0.88, 0.92))
 	overlay_col.add_child(overlay_body)
 	_overlay_content = overlay_col
@@ -141,6 +146,30 @@ func _build() -> void:
 	_volume_slider.value = AudioManager.master_volume
 	_volume_slider.value_changed.connect(func(value: float): AudioManager.master_volume = value)
 	overlay_col.add_child(_volume_slider)
+	_graphics_label = _label(LocaleManager.translate("graphics"), 13, Color(0.62,0.76,0.83))
+	overlay_col.add_child(_graphics_label)
+	_graphics_option = OptionButton.new()
+	_graphics_option.custom_minimum_size = Vector2(0, 34)
+	_graphics_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_graphics_option.add_item(LocaleManager.translate("graphics_performance"), 0)
+	_graphics_option.add_item(LocaleManager.translate("graphics_balanced"), 1)
+	_graphics_option.add_item(LocaleManager.translate("graphics_quality"), 2)
+	_graphics_option.select(SettingsManager.get_quality_index())
+	_graphics_option.item_selected.connect(func(index: int): SettingsManager.set_graphics_quality(SettingsManager.get_quality_name(index)))
+	overlay_col.add_child(_graphics_option)
+	_settings_hint = _label(LocaleManager.translate("graphics_hint"), 11, Color(0.56,0.67,0.74))
+	_settings_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	overlay_col.add_child(_settings_hint)
+	_sensitivity_label = _label(LocaleManager.translate("camera_sensitivity"), 13, Color(0.62,0.76,0.83))
+	overlay_col.add_child(_sensitivity_label)
+	_sensitivity_slider = HSlider.new()
+	_sensitivity_slider.min_value = 0.5
+	_sensitivity_slider.max_value = 1.5
+	_sensitivity_slider.step = 0.05
+	_sensitivity_slider.value = SettingsManager.sensitivity_scale
+	_sensitivity_slider.value_changed.connect(func(value: float): SettingsManager.set_sensitivity_scale(value, false))
+	_sensitivity_slider.drag_ended.connect(func(_changed: bool): SettingsManager.save_settings())
+	overlay_col.add_child(_sensitivity_slider)
 	_action(overlay_col, "back", func(): close_panels())
 
 	dialogue = _make_panel(root, Vector2(0.3, 0.32), Vector2(0.7, 0.68))
@@ -266,10 +295,15 @@ func _show_overlay(kind: String) -> void:
 			body = LocaleManager.translate("pause_message")
 		"settings":
 			title = LocaleManager.translate("settings_title")
-			body = "Graphics: Balanced\nAudio: Procedural patrol engine tone\nControls: WASD / Mouse / E\nAccessibility: فارسی / English"
+			body = LocaleManager.translate("graphics_hint")
 	overlay_title.text = title
 	overlay_body.text = body
 	_volume_slider.visible = kind == "settings"
+	_graphics_label.visible = kind == "settings"
+	_graphics_option.visible = kind == "settings"
+	_settings_hint.visible = kind == "settings"
+	_sensitivity_label.visible = kind == "settings"
+	_sensitivity_slider.visible = kind == "settings"
 	overlay.visible = true
 	dispatch_panel.visible = false
 	_set_mouse(true)
@@ -314,3 +348,13 @@ func _refresh_language(_code: String) -> void:
 			item.text = LocaleManager.translate(str(item.get_meta("translation_key", "")))
 	if is_instance_valid(_dialog_copy):
 		_dialog_copy.text = LocaleManager.translate("citizen_text")
+	if is_instance_valid(_graphics_label):
+		_graphics_label.text = LocaleManager.translate("graphics")
+	if is_instance_valid(_graphics_option):
+		_graphics_option.set_item_text(0, LocaleManager.translate("graphics_performance"))
+		_graphics_option.set_item_text(1, LocaleManager.translate("graphics_balanced"))
+		_graphics_option.set_item_text(2, LocaleManager.translate("graphics_quality"))
+	if is_instance_valid(_settings_hint):
+		_settings_hint.text = LocaleManager.translate("graphics_hint")
+	if is_instance_valid(_sensitivity_label):
+		_sensitivity_label.text = LocaleManager.translate("camera_sensitivity")

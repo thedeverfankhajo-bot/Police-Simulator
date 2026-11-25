@@ -12,6 +12,7 @@ var driven: bool = false
 var siren_on: bool = false
 var headlights_on: bool = true
 var speed_kmh: float = 0.0
+var camera_sensitivity: float = 0.0022
 var _longitudinal_speed: float = 0.0
 var _camera: Camera3D
 var _camera_pivot: Node3D
@@ -93,8 +94,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not driven or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
 	if event is InputEventMouseMotion:
-		_camera_pivot.rotation.y -= event.relative.x * 0.0022
-		_camera_pitch = clampf(_camera_pitch - event.relative.y * 0.0018, -0.55, 0.25)
+		_camera_pivot.rotation.y -= event.relative.x * camera_sensitivity
+		_camera_pitch = clampf(_camera_pitch - event.relative.y * camera_sensitivity * 0.82, -0.55, 0.25)
 		_camera_pivot.rotation.x = _camera_pitch
 
 func _physics_process(delta: float) -> void:
@@ -134,6 +135,11 @@ func _physics_process(delta: float) -> void:
 	speed_kmh = absf(_longitudinal_speed) * 3.6
 	AudioManager.set_engine_intensity(clampf(absf(_longitudinal_speed) / max_speed, 0.0, 1.0) if driven else 0.0)
 	vehicle_state_changed.emit(speed_kmh, siren_on)
+
+func set_camera_sensitivity(value: float) -> void:
+	if not is_finite(value):
+		return
+	camera_sensitivity = clampf(value, 0.001, 0.006)
 
 func set_driven(value: bool) -> void:
 	driven = value

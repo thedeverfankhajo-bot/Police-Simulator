@@ -102,6 +102,7 @@ func _build_environment() -> void:
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 110.0
 	add_child(sun)
+	SettingsManager.configure_world(environment_node, sun)
 	rain = GPUParticles3D.new()
 	rain.amount = 360
 	rain.lifetime = 2.2
@@ -189,6 +190,7 @@ func _spawn_player() -> void:
 	patrol_car.name = "PatrolSedan"
 	patrol_car.position = Vector3(29,0.2,47)
 	add_child(patrol_car)
+	SettingsManager.configure_camera_targets(player, patrol_car)
 	patrol_car.add_to_group("interactables")
 	patrol_car.set_meta("interaction_type","vehicle")
 	patrol_car.set_meta("prompt","خودروی گشت  •  E ورود")
