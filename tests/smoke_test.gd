@@ -159,6 +159,54 @@ func _initialize() -> void:
 	building.queue_free()
 	await process_frame
 
+	var road_scene := load("res://scenes/city/city_road_segment.tscn") as PackedScene
+	if road_scene == null:
+		push_error("Smoke test failed: modular city road scene could not be loaded.")
+		quit(1)
+		return
+	var vertical_road := road_scene.instantiate() as CityRoadSegment
+	if vertical_road == null:
+		push_error("Smoke test failed: modular city road script was not attached.")
+		quit(1)
+		return
+	vertical_road.configure(10.0, 220.0, CityRoadSegment.Axis.NORTH_SOUTH)
+	root.add_child(vertical_road)
+	var horizontal_road := road_scene.instantiate() as CityRoadSegment
+	if horizontal_road == null:
+		push_error("Smoke test failed: horizontal city road could not be instantiated.")
+		quit(1)
+		return
+	horizontal_road.configure(7.5, 220.0, CityRoadSegment.Axis.EAST_WEST)
+	root.add_child(horizontal_road)
+	await process_frame
+	var road_surface := vertical_road.get_node_or_null("RoadSurface") as MeshInstance3D
+	var road_plane := road_surface.mesh as PlaneMesh if road_surface != null else null
+	var asphalt_material := road_surface.material_override as ShaderMaterial if road_surface != null else null
+	var road_markings := vertical_road.get_node_or_null("CenterLineDashes") as MultiMeshInstance3D
+	if road_plane == null or not road_plane.size.is_equal_approx(Vector2(10.0, 220.0)):
+		push_error("Smoke test failed: configured road surface dimensions were not applied.")
+		quit(1)
+		return
+	if asphalt_material == null or asphalt_material.shader == null or not asphalt_material.shader.code.contains("ROUGHNESS"):
+		push_error("Smoke test failed: procedural asphalt shader did not load its PBR roughness output.")
+		quit(1)
+		return
+	if road_markings == null or road_markings.multimesh == null or road_markings.multimesh.instance_count < 10:
+		push_error("Smoke test failed: road center-line markings were not batched.")
+		quit(1)
+		return
+	if vertical_road.get_node_or_null("SidewalkLeft") == null or vertical_road.get_node_or_null("SidewalkRight") == null:
+		push_error("Smoke test failed: modular road sidewalks were not created.")
+		quit(1)
+		return
+	if not is_equal_approx(horizontal_road.rotation.y, PI * 0.5):
+		push_error("Smoke test failed: east-west road orientation was not applied.")
+		quit(1)
+		return
+	vertical_road.queue_free()
+	horizontal_road.queue_free()
+	await process_frame
+
 	var traffic_script := load("res://scripts/traffic/traffic_car.gd") as Script
 	if traffic_script == null:
 		push_error("Smoke test failed: traffic car script could not be loaded for lane checks.")

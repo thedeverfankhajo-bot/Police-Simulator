@@ -9,6 +9,7 @@ const WEATHER_SCRIPT = preload("res://scripts/environment/weather_controller.gd"
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic/traffic_manager.gd")
 const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.tscn")
 const CITY_BUILDING_SCENE: PackedScene = preload("res://scenes/city/city_building.tscn")
+const CITY_ROAD_SEGMENT_SCENE: PackedScene = preload("res://scenes/city/city_road_segment.tscn")
 
 var player: Variant
 var patrol_car: Variant
@@ -135,17 +136,10 @@ func _build_city() -> void:
 	navigation_mesh.add_polygon(PackedInt32Array([0,1,2,3]))
 	navigation_region.navigation_mesh = navigation_mesh
 	add_child(navigation_region)
-	for road in [-100.0,-50.0,0.0,50.0,100.0]:
+	for road in [-100.0, -50.0, 0.0, 50.0, 100.0]:
 		var width := 10.0 if road == 0.0 else 7.5
-		_box(self,Vector3(road,0.01,0),Vector3(width,0.12,220),asphalt)
-		_box(self,Vector3(0,0.015,road),Vector3(220,0.12,width),asphalt)
-		_box(self,Vector3(road+width*0.5+1.5,0.08,0),Vector3(3,0.22,220),sidewalk)
-		_box(self,Vector3(road-width*0.5-1.5,0.08,0),Vector3(3,0.22,220),sidewalk)
-		_box(self,Vector3(0,0.08,road+width*0.5+1.5),Vector3(220,0.22,3),sidewalk)
-		_box(self,Vector3(0,0.08,road-width*0.5-1.5),Vector3(220,0.22,3),sidewalk)
-		for stripe in range(-96,97,12):
-			_box(self,Vector3(road,0.085,float(stripe)),Vector3(0.12,0.025,4),paint)
-			_box(self,Vector3(float(stripe),0.085,road),Vector3(4,0.025,0.12),paint)
+		_add_road_segment(Vector3(road, 0.0, 0.0), width, CityRoadSegment.Axis.NORTH_SOUTH)
+		_add_road_segment(Vector3(0.0, 0.0, road), width, CityRoadSegment.Axis.EAST_WEST)
 
 	var park := _mat(Color(0.24,0.38,0.24),0.98)
 	_box(self,Vector3(-25,0.04,25),Vector3(37,0.18,37),park)
@@ -485,6 +479,16 @@ func _building(pos: Vector3, size: Vector3, palette: Array, district: String) ->
 	building.position = pos
 	building.configure(size, facade_color, district, randi())
 	add_child(building)
+
+func _add_road_segment(world_position: Vector3, width: float, orientation: CityRoadSegment.Axis) -> void:
+	var segment := CITY_ROAD_SEGMENT_SCENE.instantiate() as CityRoadSegment
+	if segment == null:
+		push_error("City road segment scene could not be instantiated.")
+		return
+	segment.name = "RoadSegment_%s_%s" % [str(orientation), str(int(absf(world_position.x + world_position.z)))]
+	segment.position = world_position
+	segment.configure(width, 220.0, orientation)
+	add_child(segment)
 
 func _box(parent: Node3D, pos: Vector3, size: Vector3, material: Material, solid: bool = false) -> MeshInstance3D:
 	var mesh := MeshInstance3D.new()
