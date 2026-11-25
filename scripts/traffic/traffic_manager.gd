@@ -10,12 +10,25 @@ func populate(parent: Node3D, routes: Array[Array]) -> void:
 		Color(0.55, 0.55, 0.58), Color(0.12, 0.15, 0.19)
 	]
 	var index := 0
-	for route in routes:
+	for route_value: Variant in routes:
+		if not route_value is Array:
+			push_warning("Skipping a traffic route that is not an Array.")
+			continue
+		var route: Array[Vector3] = []
+		for point: Variant in route_value:
+			if point is Vector3:
+				route.append(point)
+		if route.size() < 2:
+			push_warning("Skipping a traffic route with fewer than two Vector3 points.")
+			continue
 		var car_script: Script = load("res://scripts/traffic/traffic_car.gd")
+		if car_script == null:
+			push_error("Traffic car script could not be loaded.")
+			return
 		var car: CharacterBody3D = CharacterBody3D.new()
 		car.set_script(car_script)
 		car.call("configure", route, palette[index % palette.size()], 7.2 + float(index % 3) * 1.1)
-		car.global_position = route[0]
+		car.position = route[0]
 		parent.add_child(car)
 		car.add_to_group("traffic_cars")
 		_cars.append(car)

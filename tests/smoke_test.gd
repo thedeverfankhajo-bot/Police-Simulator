@@ -45,5 +45,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	hud.call("close_panels")
+	instance.queue_free()
+	await process_frame
 	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, interactables, and map/pause overlays initialized.")
 	quit(0)
