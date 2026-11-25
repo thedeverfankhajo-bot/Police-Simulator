@@ -1,7 +1,6 @@
 extends Node
 
 var _player: AudioStreamPlayer
-var _playback: AudioStreamGeneratorPlayback
 var _phase: float = 0.0
 var _engine_level: float = 0.0
 var _siren_enabled: bool = false
@@ -17,7 +16,6 @@ func _ready() -> void:
 	_player.volume_db = -8.0
 	add_child(_player)
 	_player.play()
-	_playback = _player.get_stream_playback() as AudioStreamGeneratorPlayback
 
 func set_engine_intensity(value: float) -> void:
 	_engine_level = clampf(value, 0.0, 1.0)
@@ -32,9 +30,12 @@ func play_ui_tick() -> void:
 	_horn_until_msec = Time.get_ticks_msec() + 55
 
 func _process(_delta: float) -> void:
-	if _playback == null:
+	if not is_instance_valid(_player):
 		return
-	var frames := mini(_playback.get_frames_available(), 1024)
+	var playback := _player.get_stream_playback() as AudioStreamGeneratorPlayback
+	if playback == null:
+		return
+	var frames := mini(playback.get_frames_available(), 1024)
 	for index in range(frames):
 		var time_now := Time.get_ticks_msec()
 		var frequency := 48.0 + _engine_level * 115.0
@@ -49,19 +50,11 @@ func _process(_delta: float) -> void:
 		if _phase > TAU:
 			_phase -= TAU
 		var sample := sin(_phase) * amplitude
-		_playback.push_frame(Vector2(sample, sample))
-
+		playback.push_frame(Vector2(sample, sample))
 func _exit_tree() -> void:
-	# The generator playback is retained by AudioStreamPlayer as well as this
-	# script. Stop it, detach its stream, and free the player before releasing
-	# the script's final strong reference to AudioStreamGeneratorPlayback.
-	var player_to_release := _player
+	if is_instance_valid(_player):
+		_player.stop()
+		_player.stream = null
+		remove_child(_player)
+		_player.free()
 	_player = null
-	if is_instance_valid(player_to_release):
-		player_to_release.stop()
-		player_to_release.stream = null
-		_playback = null
-		remove_child(player_to_release)
-		player_to_release.free()
-	else:
-		_playback = null

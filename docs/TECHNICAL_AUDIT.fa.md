@@ -199,3 +199,6 @@
 
 
 - نتیجهٔ CI پس از اولین اصلاح چرخهٔ عمر: Smoke Test موفق بود، اما گزارش verbose همچنان AudioStreamGeneratorPlayback با Reference Count برابر ۱ را نشان داد. آزادکردن متغیر محلی کافی نبود؛ اصلاح تکمیلی AudioManager اکنون علاوه بر توقف پخش و null کردن stream، AudioStreamPlayer فرزند را در خروج Autoload صریحاً از درخت جدا و آزاد می‌کند. این راه‌حل تا بررسی لاگ اجرای بعدی تأییدشده محسوب نمی‌شود.
+
+
+- اصلاح چرخهٔ عمر در مرحلهٔ بعد: عضو دائمی AudioStreamGeneratorPlayback حذف شد؛ اکنون playback handle فقط در متغیر محلی _process نگهداری می‌شود. AudioStreamPlayer هنگام خروج متوقف، Stream آن قطع و خود Node صریحاً آزاد می‌شود. نتیجهٔ leak check در اجرای CI بعدی باید بررسی شود.
