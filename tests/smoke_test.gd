@@ -786,11 +786,11 @@ func _initialize() -> void:
 	var original_quality := str(settings_manager.get("graphics_quality"))
 	var original_sensitivity := float(settings_manager.get("sensitivity_scale"))
 	var root_viewport := get_root().get_viewport()
-	var sun_light := instance.get_node_or_null("DirectionalLight3D") as DirectionalLight3D
-	var officer := instance.get_node_or_null("PlayerOfficer")
-	var patrol_vehicle := instance.get_node_or_null("PatrolSedan")
+	var sun_light := instance.get("sun") as DirectionalLight3D
+	var officer := instance.get("player") as Node
+	var patrol_vehicle := instance.get("patrol_car") as Node
 	if sun_light == null or officer == null or patrol_vehicle == null:
-		push_error("Smoke test failed: graphics or camera targets were not registered in the world.")
+		push_error("Smoke test failed: graphics or camera targets were not registered in the world (sun=%s, player=%s, vehicle=%s)." % [str(sun_light != null), str(officer != null), str(patrol_vehicle != null)])
 		quit(1)
 		return
 	if not bool(settings_manager.call("set_graphics_quality", "performance")):
