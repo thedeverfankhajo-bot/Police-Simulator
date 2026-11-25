@@ -11,7 +11,7 @@ func _initialize() -> void:
 	await process_frame
 
 	# Streaming decisions must use the nearest building footprint edge, not its origin.
-	var block_manager := instance.get_node_or_null("CityBlockManager") as CityBlockManager
+	var streaming_manager := instance.get_node_or_null("CityBlockManager") as CityBlockManager
 	if block_manager == null:
 		push_error("Smoke test failed: CityBlockManager did not initialize.")
 		quit(1)
@@ -28,10 +28,10 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the city streaming footprint fixture is invalid.")
 		quit(1)
 		return
-	var inside_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(8.0, 18.0)))
-	var edge_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(15.0, 0.0)))
-	var outside_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(25.0, 0.0)))
-	var load_boundary_distance := float(block_manager.call("_distance_to_block", streaming_probe, Vector2(block_manager.load_radius + 5.0, 0.0)))
+	var inside_distance := float(streaming_manager.call("_distance_to_block", streaming_probe, Vector2(8.0, 18.0)))
+	var edge_distance := float(streaming_manager.call("_distance_to_block", streaming_probe, Vector2(15.0, 0.0)))
+	var outside_distance := float(streaming_manager.call("_distance_to_block", streaming_probe, Vector2(25.0, 0.0)))
+	var load_boundary_distance := float(streaming_manager.call("_distance_to_block", streaming_probe, Vector2(streaming_manager.load_radius + 5.0, 0.0)))
 	if not is_zero_approx(inside_distance):
 		push_error("Smoke test failed: a player inside a building footprint did not receive zero streaming distance.")
 		quit(1)
@@ -44,7 +44,7 @@ func _initialize() -> void:
 		push_error("Smoke test failed: city streaming distance outside the footprint is incorrect.")
 		quit(1)
 		return
-	if load_boundary_distance > block_manager.load_radius:
+	if load_boundary_distance > streaming_manager.load_radius:
 		push_error("Smoke test failed: a large building entering the load radius was treated as outside.")
 		quit(1)
 		return
