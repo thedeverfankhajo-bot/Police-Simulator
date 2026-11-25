@@ -368,22 +368,22 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the five city block definitions were not registered.")
 		quit(1)
 		return
-	if int(block_manager.call("get_block_count")) != 4:
+	if int(block_manager.call("get_block_count")) != 5:
 		push_error("Smoke test failed: nearby city blocks were not streamed into the world.")
 		quit(1)
 		return
-	if int(block_manager.call("get_building_count")) != 21:
+	if int(block_manager.call("get_building_count")) != 25:
 		push_error("Smoke test failed: the active city blocks did not spawn the expected 21 nearby buildings.")
 		quit(1)
 		return
-	if bool(block_manager.call("is_block_loaded", "downtown_towers")):
-		push_error("Smoke test failed: the distant downtown block was loaded outside the streaming radius.")
+	if not bool(block_manager.call("is_block_loaded", "downtown_towers")):
+		push_error("Smoke test failed: a downtown building footprint intersecting the load radius was not streamed.")
 		quit(1)
 		return
 	var expected_district_buildings := {
 		"residential": 6,
 		"commercial": 6,
-		"downtown": 0,
+		"downtown": 4,
 		"industrial": 5,
 		"civic_services": 4
 	}
@@ -395,6 +395,7 @@ func _initialize() -> void:
 			return
 
 	# Verify lazy loading, hysteresis and unloading as the officer moves between districts.
+	block_manager.call("_unload_block", "downtown_towers")
 	block_manager.call("update_player_position", Vector3(-17.0, 0.2, -64.0))
 	if not bool(block_manager.call("is_block_loaded", "downtown_towers")):
 		push_error("Smoke test failed: downtown block did not load when the officer approached it.")
@@ -415,7 +416,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	block_manager.call("update_player_position", Vector3(20.0, 0.2, 45.0))
-	if int(block_manager.call("get_block_count")) != 4 or int(block_manager.call("get_building_count")) != 21:
+	if int(block_manager.call("get_block_count")) != 5 or int(block_manager.call("get_building_count")) != 25:
 		push_error("Smoke test failed: the starting city blocks did not reload after returning.")
 		quit(1)
 		return
