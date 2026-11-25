@@ -387,6 +387,17 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var hud: Node = instance.get_node("GameHUD")
+	hud.call("update_hud", 0.0, "", "Industrial District", "10:00", -1.0, false, Vector3.ZERO)
+	var district_label := hud.get("hud_district") as Label
+	if district_label == null or district_label.text != "Industrial District":
+		push_error("Smoke test failed: HUD did not display the active city district.")
+		quit(1)
+		return
+	hud.call("update_hud", 0.0, "", "Residential District", "10:01", -1.0, false, Vector3.ZERO)
+	if district_label.text != "Residential District":
+		push_error("Smoke test failed: HUD district label did not update when the player changed districts.")
+		quit(1)
+		return
 	hud.call("show_overlay", "map")
 	if not bool(hud.call("is_panel_open")):
 		push_error("Smoke test failed: map overlay did not open.")

@@ -15,6 +15,7 @@ var hud_mission: Label
 var hud_trust: Label
 var hud_distance: Label
 var hud_position: Label
+var hud_district: Label
 var hud_prompt: Label
 var dispatch_panel: PanelContainer
 var overlay: PanelContainer
@@ -49,8 +50,8 @@ func _build() -> void:
 	var brand := _label("POLICE  /  CITY SERVICES", 15, Color(0.42, 0.76, 0.94))
 	brand.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(brand)
-	var district := _label("NORTH DISTRICT", 14)
-	row.add_child(district)
+	hud_district = _label("NORTH DISTRICT", 14)
+	row.add_child(hud_district)
 	hud_clock = _label("10:00", 15)
 	row.add_child(hud_clock)
 	hud_trust = _label("", 14, Color(0.44, 0.83, 0.66))
@@ -203,6 +204,7 @@ func _action(parent: Control, key: String, callback: Callable) -> void:
 
 func update_hud(speed: float, mission_name: String, district: String, clock_text: String, distance: float, driving: bool, world_position: Vector3) -> void:
 	hud_speed.text = "%.0f km/h" % speed if driving else LocaleManager.translate("on_foot")
+	hud_district.text = district
 	hud_mission.text = mission_name if mission_name != "" else LocaleManager.translate("mission_none")
 	hud_clock.text = clock_text
 	hud_position.text = "GPS: X %.0f  /  Z %.0f" % [world_position.x, world_position.z]
