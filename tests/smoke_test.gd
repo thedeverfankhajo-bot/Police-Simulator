@@ -12,7 +12,7 @@ func _initialize() -> void:
 
 	# Streaming decisions must use the nearest building footprint edge, not its origin.
 	var streaming_manager := instance.get_node_or_null("CityBlockManager") as CityBlockManager
-	if block_manager == null:
+	if streaming_manager == null:
 		push_error("Smoke test failed: CityBlockManager did not initialize.")
 		quit(1)
 		return
