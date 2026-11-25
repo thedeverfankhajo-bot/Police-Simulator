@@ -38,6 +38,8 @@ func _ready() -> void:
 	_build_systems()
 	_build_hud()
 	_restore_save()
+	if is_instance_valid(city_block_manager):
+		city_block_manager.update_player_position(_current_position())
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	missions.mission_completed.connect(_mission_completed)
 	GameState.report_added.connect(_report_added)
