@@ -11,6 +11,7 @@ const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.
 const CITY_BLOCK_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_block_manager.tscn")
 const CITY_ROAD_SEGMENT_SCENE: PackedScene = preload("res://scenes/city/city_road_segment.tscn")
 const TRAFFIC_SIGNAL_SCENE: PackedScene = preload("res://scenes/city/traffic_signal.tscn")
+const STREET_LIGHT_SCENE: PackedScene = preload("res://scenes/city/city_street_light.tscn")
 
 var player: Variant
 var patrol_car: Variant
@@ -539,17 +540,13 @@ func _bench(pos: Vector3) -> void:
 	_box(self,pos+Vector3(0.8,0.32,0),Vector3(0.14,0.7,0.48),metal)
 
 func _street_lamp(pos: Vector3) -> void:
-	var metal := _mat(Color(0.13,0.16,0.18),0.46)
-	_box(self,pos+Vector3(0,3.1,0),Vector3(0.16,6.2,0.16),metal)
-	_box(self,pos+Vector3(0.55,6,0),Vector3(1.1,0.12,0.22),metal)
-	var light := OmniLight3D.new()
-	light.add_to_group("street_lights")
-	light.position = pos+Vector3(0.95,5.8,0)
-	light.omni_range = 10
-	light.light_energy = 0.0
-	light.light_color = Color(0.95,0.81,0.62)
-	add_child(light)
-
+	var lamp := STREET_LIGHT_SCENE.instantiate() as CityStreetLight
+	if lamp == null:
+		push_error("City street light scene could not be instantiated.")
+		return
+	lamp.name = "StreetLight_%02d" % (get_tree().get_nodes_in_group("city_street_lamp_components").size() + 1)
+	lamp.position = pos
+	add_child(lamp)
 func _traffic_light(pos: Vector3) -> void:
 	var signal_node := TRAFFIC_SIGNAL_SCENE.instantiate() as TrafficSignalController
 	if signal_node == null:
