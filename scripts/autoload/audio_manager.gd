@@ -8,6 +8,11 @@ var _horn_until_msec: int = 0
 var master_volume: float = 0.18
 
 func _ready() -> void:
+	# A headless runner has no audio output device. Avoid creating an
+	# AudioStreamGeneratorPlayback that the headless audio backend cannot drain.
+	if DisplayServer.get_name() == "headless":
+		set_process(false)
+		return
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = 22050.0
 	generator.buffer_length = 0.35
@@ -16,7 +21,6 @@ func _ready() -> void:
 	_player.volume_db = -8.0
 	add_child(_player)
 	_player.play()
-
 func set_engine_intensity(value: float) -> void:
 	_engine_level = clampf(value, 0.0, 1.0)
 
@@ -28,6 +32,9 @@ func play_horn() -> void:
 
 func play_ui_tick() -> void:
 	_horn_until_msec = Time.get_ticks_msec() + 55
+
+func is_audio_backend_active() -> bool:
+	return is_instance_valid(_player)
 
 func _process(_delta: float) -> void:
 	if not is_instance_valid(_player):

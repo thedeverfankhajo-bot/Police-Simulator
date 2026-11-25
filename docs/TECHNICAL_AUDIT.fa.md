@@ -202,3 +202,6 @@
 
 
 - اصلاح چرخهٔ عمر در مرحلهٔ بعد: عضو دائمی AudioStreamGeneratorPlayback حذف شد؛ اکنون playback handle فقط در متغیر محلی _process نگهداری می‌شود. AudioStreamPlayer هنگام خروج متوقف، Stream آن قطع و خود Node صریحاً آزاد می‌شود. نتیجهٔ leak check در اجرای CI بعدی باید بررسی شود.
+
+
+- تحلیل دو اجرای verbose نشان داد AudioStreamGeneratorPlayback حتی پس از حذف مرجع دائمی و آزادسازی AudioStreamPlayer در Runner بدون دستگاه صوتی باقی می‌ماند. در حالت headless اکنون AudioManager اصلاً AudioStreamGenerator نمی‌سازد و پردازش صوت را غیرفعال می‌کند؛ در اجرای تعاملی، مسیر صدای procedural دست‌نخورده و فعال باقی می‌ماند. این تغییر باید در CI headless تأیید شود.
