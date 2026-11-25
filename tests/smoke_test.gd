@@ -27,6 +27,48 @@ func _initialize() -> void:
 		push_error("Smoke test failed: mission catalogue is missing entries.")
 		quit(1)
 		return
+	for mission_data: Dictionary in catalogue:
+		if not bool(manager.call("is_valid_mission_data", mission_data)):
+			push_error("Smoke test failed: a production mission failed schema validation.")
+			quit(1)
+			return
+
+	var valid_mission_probe := {
+		"id": "TEST-001",
+		"type": "help_citizen",
+		"title_fa": "آزمون مأموریت",
+		"title_en": "Mission validation test",
+		"description_fa": "شرح آزمون",
+		"description_en": "Test description",
+		"priority": "normal",
+		"target_label": "Test target",
+		"location": [1.0, 0.0, -2.0],
+		"reward": 100,
+		"trust": 2
+	}
+	if not bool(manager.call("is_valid_mission_data", valid_mission_probe)):
+		push_error("Smoke test failed: a complete mission definition was rejected.")
+		quit(1)
+		return
+
+	var invalid_mission_probes: Array[Dictionary] = []
+	var missing_translation := valid_mission_probe.duplicate(true)
+	missing_translation["title_en"] = " "
+	invalid_mission_probes.append(missing_translation)
+	var negative_reward := valid_mission_probe.duplicate(true)
+	negative_reward["reward"] = -1
+	invalid_mission_probes.append(negative_reward)
+	var non_finite_location := valid_mission_probe.duplicate(true)
+	non_finite_location["location"] = [INF, 0.0, 0.0]
+	invalid_mission_probes.append(non_finite_location)
+	var out_of_range_trust := valid_mission_probe.duplicate(true)
+	out_of_range_trust["trust"] = 101
+	invalid_mission_probes.append(out_of_range_trust)
+	for invalid_probe: Dictionary in invalid_mission_probes:
+		if bool(manager.call("is_valid_mission_data", invalid_probe)):
+			push_error("Smoke test failed: an invalid mission definition was accepted.")
+			quit(1)
+			return
 	var city_manager: Node = instance.get_node_or_null("CityManager")
 	if city_manager == null or int(city_manager.call("get_district_count")) != 7:
 		push_error("Smoke test failed: the seven city district resources did not load.")

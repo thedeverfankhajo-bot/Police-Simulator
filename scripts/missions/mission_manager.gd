@@ -48,16 +48,48 @@ func _load_catalogue() -> void:
 		push_warning("Mission catalogue contains no valid entries.")
 
 func is_valid_mission_data(mission: Dictionary) -> bool:
-	var mission_id := str(mission.get("id", "")).strip_edges()
-	var mission_type := str(mission.get("type", "")).strip_edges()
-	var location: Variant = mission.get("location", null)
-	if mission_id.is_empty() or mission_type.is_empty():
+	var id_value: Variant = mission.get("id", null)
+	var type_value: Variant = mission.get("type", null)
+	if not id_value is String or not type_value is String:
 		return false
+	if id_value.strip_edges().is_empty() or id_value != id_value.strip_edges():
+		return false
+	if type_value.strip_edges().is_empty() or type_value != type_value.strip_edges():
+		return false
+
+	var required_text_fields: Array[String] = [
+		"title_fa",
+		"title_en",
+		"description_fa",
+		"description_en",
+		"priority",
+		"target_label"
+	]
+	for field_name: String in required_text_fields:
+		var field_value: Variant = mission.get(field_name, null)
+		if not field_value is String or field_value.strip_edges().is_empty():
+			return false
+
+	var location: Variant = mission.get("location", null)
 	if not location is Array or location.size() != 3:
 		return false
 	for coordinate: Variant in location:
 		if not (coordinate is int or coordinate is float):
 			return false
+		if not is_finite(float(coordinate)):
+			return false
+
+	var reward_value: Variant = mission.get("reward", null)
+	if not (reward_value is int or reward_value is float):
+		return false
+	if not is_finite(float(reward_value)) or float(reward_value) < 0.0:
+		return false
+
+	var trust_value: Variant = mission.get("trust", null)
+	if not (trust_value is int or trust_value is float):
+		return false
+	if not is_finite(float(trust_value)) or float(trust_value) < -100.0 or float(trust_value) > 100.0:
+		return false
 	return true
 
 func get_next_mission() -> Dictionary:
