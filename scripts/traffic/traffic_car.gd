@@ -90,7 +90,7 @@ func _nearby_vehicle_ahead(forward: Vector3) -> bool:
 	for other in get_tree().get_nodes_in_group("traffic_cars"):
 		if other == self or not is_instance_valid(other) or not other is Node3D:
 			continue
-		var other_forward := -other.global_transform.basis.z
+		var other_forward: Vector3 = -other.global_transform.basis.z
 		if is_vehicle_ahead_in_lane(global_position, forward, other.global_position, other_forward):
 			return true
 	return false

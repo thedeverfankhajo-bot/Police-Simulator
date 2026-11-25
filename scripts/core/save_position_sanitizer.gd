@@ -1,3 +1,4 @@
+class_name SavePositionSanitizer
 extends RefCounted
 
 func sanitize_position_data(position_data: Variant, fallback: Vector3) -> Array[float]:
@@ -6,7 +7,8 @@ func sanitize_position_data(position_data: Variant, fallback: Vector3) -> Array[
 		return safe_position
 	for axis: int in range(3):
 		var coordinate: Variant = position_data[axis]
-		if not (coordinate is int or coordinate is float):
+		var coordinate_type := typeof(coordinate)
+		if coordinate_type != TYPE_INT and coordinate_type != TYPE_FLOAT:
 			return safe_position
 		var value := float(coordinate)
 		if not is_finite(value):

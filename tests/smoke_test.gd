@@ -70,24 +70,23 @@ func _initialize() -> void:
 			quit(1)
 			return
 	var fallback_spawn := Vector3(20.0, 0.0, 28.0)
-	var sanitizer_script: Script = load("res://scripts/core/save_position_sanitizer.gd")
-	var position_sanitizer: RefCounted = sanitizer_script.new()
-	var clamped_position: Array[float] = position_sanitizer.call("sanitize_position_data", [120.0, 1.5, -130.0], fallback_spawn)
+	var position_sanitizer := SavePositionSanitizer.new()
+	var clamped_position: Array[float] = position_sanitizer.sanitize_position_data([120.0, 1.5, -130.0], fallback_spawn)
 	if not is_equal_approx(clamped_position[0], 95.0) or not is_equal_approx(clamped_position[1], 1.5) or not is_equal_approx(clamped_position[2], -95.0):
 		push_error("Smoke test failed: saved coordinates were not clamped to world bounds.")
 		quit(1)
 		return
-	var non_finite_position: Array[float] = position_sanitizer.call("sanitize_position_data", [INF, 0.0, 0.0], fallback_spawn)
+	var non_finite_position: Array[float] = position_sanitizer.sanitize_position_data([INF, 0.0, 0.0], fallback_spawn)
 	if not is_equal_approx(non_finite_position[0], fallback_spawn.x) or not is_equal_approx(non_finite_position[1], fallback_spawn.y) or not is_equal_approx(non_finite_position[2], fallback_spawn.z):
 		push_error("Smoke test failed: non-finite saved coordinates did not use the safe spawn.")
 		quit(1)
 		return
-	var malformed_position: Array[float] = position_sanitizer.call("sanitize_position_data", [1.0, "invalid", 3.0], fallback_spawn)
+	var malformed_position: Array[float] = position_sanitizer.sanitize_position_data([1.0, "invalid", 3.0], fallback_spawn)
 	if not is_equal_approx(malformed_position[0], fallback_spawn.x) or not is_equal_approx(malformed_position[1], fallback_spawn.y) or not is_equal_approx(malformed_position[2], fallback_spawn.z):
 		push_error("Smoke test failed: malformed saved coordinates did not use the safe spawn.")
 		quit(1)
 		return
-	var restored_values: Array[float] = position_sanitizer.call("sanitize_position_data", [3.0, 2.0, -4.0], fallback_spawn)
+	var restored_values: Array[float] = position_sanitizer.sanitize_position_data([3.0, 2.0, -4.0], fallback_spawn)
 	var restored_position := Vector3(restored_values[0], restored_values[1], restored_values[2])
 	if not restored_position.is_equal_approx(Vector3(3.0, 2.0, -4.0)):
 		push_error("Smoke test failed: valid saved coordinates were not restored.")

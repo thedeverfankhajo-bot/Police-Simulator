@@ -4,7 +4,7 @@ const SAVE_PATH := "user://police_simulator_save.json"
 const SAVE_VERSION := 1
 const POSITION_SANITIZER_SCRIPT: Script = preload("res://scripts/core/save_position_sanitizer.gd")
 
-var _position_sanitizer: RefCounted
+var _position_sanitizer: SavePositionSanitizer
 
 func _init() -> void:
 	_position_sanitizer = POSITION_SANITIZER_SCRIPT.new()
@@ -64,5 +64,5 @@ func saved_position(data: Dictionary, fallback: Vector3) -> Vector3:
 	return Vector3(safe_position[0], safe_position[1], safe_position[2])
 
 func sanitize_position_data(position_data: Variant, fallback: Vector3) -> Array[float]:
-	var safe_position: Array[float] = _position_sanitizer.call("sanitize_position_data", position_data, fallback)
+	var safe_position: Array[float] = _position_sanitizer.sanitize_position_data(position_data, fallback)
 	return safe_position
