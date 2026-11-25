@@ -10,6 +10,16 @@ func _initialize() -> void:
 	root.add_child(instance)
 	await process_frame
 
+	var audio_manager := root.get_node_or_null("AudioManager")
+	if audio_manager == null:
+		push_error("Smoke test failed: AudioManager autoload was not found.")
+		quit(1)
+		return
+	if DisplayServer.get_name() == "headless" and bool(audio_manager.call("is_audio_backend_active")):
+		push_error("Smoke test failed: headless mode created an unused audio playback backend.")
+		quit(1)
+		return
+
 	# World bootstrap delegates city construction to independent builders.
 	var road_segments := instance.get_tree().get_nodes_in_group("city_road_segments")
 	var traffic_signals := instance.get_tree().get_nodes_in_group("city_traffic_signals")
