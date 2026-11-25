@@ -200,10 +200,16 @@ func _read_save_payload(path: String) -> Dictionary:
 
 	var raw := file.get_as_text()
 	file.close()
-	var parsed: Variant = JSON.parse_string(raw)
+	var parser := JSON.new()
+	var parse_error := parser.parse(raw)
+	if parse_error != OK:
+		push_warning("Save file contains invalid JSON (%s): %s" % [parser.get_error_message(), path])
+		return {}
+
+	var parsed: Variant = parser.data
 	var validation_error := get_save_payload_validation_error(parsed)
 	if not validation_error.is_empty():
-		push_warning("Save file failed JSON or schema validation (%s): %s" % [validation_error, path])
+		push_warning("Save file failed schema validation (%s): %s" % [validation_error, path])
 		return {}
 	return parsed
 

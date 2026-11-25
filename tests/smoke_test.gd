@@ -179,6 +179,20 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the previous valid save was not preserved as a backup.")
 		quit(1)
 		return
+	save_payload["score"] = 150
+	if not bool(save_manager.call("_write_payload_transactionally", save_payload, test_save_path)):
+		push_error("Smoke test failed: a third consecutive save could not replace the backup.")
+		quit(1)
+		return
+	backup_payload = save_manager.call("_read_save_payload", test_backup_path)
+	if not backup_payload is Dictionary:
+		push_error("Smoke test failed: the rotating backup could not be read after a third save.")
+		quit(1)
+		return
+	if int(backup_payload.get("score", -1)) != 100:
+		push_error("Smoke test failed: the backup did not rotate to the immediately previous save.")
+		quit(1)
+		return
 	invalid_save = save_payload.duplicate(true)
 	invalid_save["audio_volume"] = 4.0
 	if bool(save_manager.call("_write_payload_transactionally", invalid_save, test_save_path)):
@@ -190,7 +204,7 @@ func _initialize() -> void:
 		push_error("Smoke test failed: rejecting an invalid save damaged the existing save.")
 		quit(1)
 		return
-	if int(preserved_payload.get("score", -1)) != 100:
+	if int(preserved_payload.get("score", -1)) != 150:
 		push_error("Smoke test failed: the last valid primary save was not preserved.")
 		quit(1)
 		return
@@ -207,8 +221,8 @@ func _initialize() -> void:
 		push_error("Smoke test failed: a corrupt primary save did not recover from the backup.")
 		quit(1)
 		return
-	if int(recovered_payload.get("score", -1)) != 50:
-		push_error("Smoke test failed: the backup did not restore the previous save state.")
+	if int(recovered_payload.get("score", -1)) != 100:
+		push_error("Smoke test failed: the rotating backup did not restore the previous save state.")
 		quit(1)
 		return
 	var restored_payload: Variant = save_manager.call("_read_save_payload", test_save_path)
@@ -216,7 +230,7 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the recovered primary save could not be read.")
 		quit(1)
 		return
-	if int(restored_payload.get("score", -1)) != 50:
+	if int(restored_payload.get("score", -1)) != 100:
 		push_error("Smoke test failed: the recovered backup was not restored as the primary save.")
 		quit(1)
 		return
