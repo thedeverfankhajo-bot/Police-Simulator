@@ -541,6 +541,7 @@ func _street_lamp(pos: Vector3) -> void:
 	_box(self,pos+Vector3(0,3.1,0),Vector3(0.16,6.2,0.16),metal)
 	_box(self,pos+Vector3(0.55,6,0),Vector3(1.1,0.12,0.22),metal)
 	var light := OmniLight3D.new()
+	light.add_to_group("street_lights")
 	light.position = pos+Vector3(0.95,5.8,0)
 	light.omni_range = 10
 	light.light_energy = 0.0
