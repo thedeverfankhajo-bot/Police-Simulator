@@ -8,6 +8,7 @@ const MISSION_SCRIPT = preload("res://scripts/missions/mission_manager.gd")
 const WEATHER_SCRIPT = preload("res://scripts/environment/weather_controller.gd")
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic/traffic_manager.gd")
 const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.tscn")
+const CITY_BUILDING_SCENE: PackedScene = preload("res://scenes/city/city_building.tscn")
 
 var player: Variant
 var patrol_car: Variant
@@ -472,22 +473,18 @@ func _district(p: Vector3) -> String:
 	return str(city_manager.call("get_district_label_at", p, LocaleManager.language))
 
 func _building(pos: Vector3, size: Vector3, palette: Array, district: String) -> void:
-	var color: Color = palette[randi()%palette.size()]
-	var wall := _mat(color,0.82)
-	_box(self,pos+Vector3(0,size.y*0.5,0),size,wall,true)
-	_box(self,pos+Vector3(0,0.24,0),Vector3(size.x+0.35,0.48,size.z+0.35),_mat(color.darkened(0.22)))
-	var glass := _mat(Color(0.07,0.16,0.22),0.2)
-	for floor_index in range(maxi(1,int(size.y/3.0))):
-		var y := 1.5+float(floor_index)*2.8
-		if y > size.y-0.4:
-			continue
-		for x_index in range(2):
-			var x := -size.x*0.27+float(x_index)*size.x*0.54
-			_box(self,pos+Vector3(x,y,-size.z*0.5-0.04),Vector3(size.x*0.25,1.2,0.07),glass)
-			_box(self,pos+Vector3(x,y,size.z*0.5+0.04),Vector3(size.x*0.25,1.2,0.07),glass)
-		_box(self,pos+Vector3(-size.x*0.5-0.04,y,0),Vector3(0.07,1.2,size.z*0.25),glass)
-	_box(self,pos+Vector3(0,size.y+0.2,0),Vector3(size.x+0.5,0.35,size.z+0.5),_mat(color.darkened(0.28)))
-	_sign(pos+Vector3(0,minf(size.y-0.8,3.7),-size.z*0.5-0.12),district,color.darkened(0.4))
+	if palette.is_empty():
+		push_warning("Skipping a building with an empty facade palette: %s" % district)
+		return
+	var facade_color: Color = palette[randi() % palette.size()]
+	var building := CITY_BUILDING_SCENE.instantiate() as CityBuilding
+	if building == null:
+		push_error("City building scene could not be instantiated.")
+		return
+	building.name = "%s_Building_%03d" % [district.to_lower(), get_child_count()]
+	building.position = pos
+	building.configure(size, facade_color, district, randi())
+	add_child(building)
 
 func _box(parent: Node3D, pos: Vector3, size: Vector3, material: Material, solid: bool = false) -> MeshInstance3D:
 	var mesh := MeshInstance3D.new()

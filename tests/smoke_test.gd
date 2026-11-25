@@ -128,6 +128,37 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+ 	var building_scene := load("res://scenes/city/city_building.tscn") as PackedScene
+	if building_scene == null:
+		push_error("Smoke test failed: reusable city building scene could not be loaded.")
+		quit(1)
+		return
+	var building := building_scene.instantiate() as CityBuilding
+	if building == null:
+		push_error("Smoke test failed: reusable city building script was not attached.")
+		quit(1)
+		return
+	building.configure(Vector3(14.0, 18.0, 14.0), Color(0.42, 0.48, 0.52), "COMMERCIAL", 1)
+	root.add_child(building)
+	await process_frame
+	var building_collision := building.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	var north_windows := building.get_node_or_null("Architecture/FacadeWindowsNorth") as MultiMeshInstance3D
+	var district_sign := building.get_node_or_null("Architecture/DistrictSign") as Label3D
+	if building_collision == null or building_collision.shape == null:
+		push_error("Smoke test failed: modular building collision was not created.")
+		quit(1)
+		return
+	if north_windows == null or north_windows.multimesh == null or north_windows.multimesh.instance_count < 4:
+		push_error("Smoke test failed: modular building facade windows were not batched.")
+		quit(1)
+		return
+	if district_sign == null or district_sign.text != "COMMERCIAL":
+		push_error("Smoke test failed: modular building district sign was not configured.")
+		quit(1)
+		return
+	building.queue_free()
+	await process_frame
+
 	var traffic_script := load("res://scripts/traffic/traffic_car.gd") as Script
 	if traffic_script == null:
 		push_error("Smoke test failed: traffic car script could not be loaded for lane checks.")
