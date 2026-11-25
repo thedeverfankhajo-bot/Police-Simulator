@@ -52,4 +52,4 @@ jobs:
 
       - name: Run gameplay smoke tests
         shell: bash
-        run: '"${GODOT_BIN}" --headless --path . --script res://tests/smoke_test.gd'
+        run: '"${GODOT_BIN}" --verbose --headless --path . --script res://tests/smoke_test.gd'
