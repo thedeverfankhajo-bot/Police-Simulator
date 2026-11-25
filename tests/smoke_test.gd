@@ -56,6 +56,37 @@ func _initialize() -> void:
 		push_error("Smoke test failed: an out-of-bounds position matched a city district.")
 		quit(1)
 		return
+
+	var traffic_script := load("res://scripts/traffic/traffic_car.gd") as Script
+	if traffic_script == null:
+		push_error("Smoke test failed: traffic car script could not be loaded for lane checks.")
+		quit(1)
+		return
+	var traffic_probe: Node = traffic_script.new()
+	var observer_position := Vector3.ZERO
+	var forward := Vector3.FORWARD
+	if not bool(traffic_probe.call("is_vehicle_ahead_in_lane", observer_position, forward, Vector3(0, 0, -5), forward)):
+		traffic_probe.free()
+		push_error("Smoke test failed: a same-lane vehicle ahead was not detected.")
+		quit(1)
+		return
+	if bool(traffic_probe.call("is_vehicle_ahead_in_lane", observer_position, forward, Vector3(0, 0, -5), Vector3.RIGHT)):
+		traffic_probe.free()
+		push_error("Smoke test failed: perpendicular cross traffic incorrectly blocked the lane.")
+		quit(1)
+		return
+	if bool(traffic_probe.call("is_vehicle_ahead_in_lane", observer_position, forward, Vector3(4, 0, -5), forward)):
+		traffic_probe.free()
+		push_error("Smoke test failed: an adjacent-lane vehicle incorrectly blocked the lane.")
+		quit(1)
+		return
+	if bool(traffic_probe.call("is_vehicle_ahead_in_lane", observer_position, forward, Vector3(0, 0, 5), forward)):
+		traffic_probe.free()
+		push_error("Smoke test failed: a vehicle behind incorrectly blocked the lane.")
+		quit(1)
+		return
+	traffic_probe.free()
+
 	var interactables := instance.get_tree().get_nodes_in_group("interactables")
 	if interactables.size() < 9:
 		push_error("Smoke test failed: player services, vehicle, or citizens were not registered.")
@@ -76,5 +107,5 @@ func _initialize() -> void:
 	hud.call("close_panels")
 	instance.queue_free()
 	await process_frame
-	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, district catalog priority/overlap, interactables, and map/pause overlays initialized.")
+	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, district catalog, traffic lane filtering, interactables, and UI overlays initialized.")
 	quit(0)
