@@ -357,6 +357,35 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var weather_controller: Node = instance.get_node("WeatherController")
+	var street_lights: Array = instance.get_tree().get_nodes_in_group("street_lights")
+	if street_lights.size() != 6:
+		push_error("Smoke test failed: all six city street lamps were not registered.")
+		quit(1)
+		return
+	for street_light: Node in street_lights:
+		var initial_lamp := street_light as OmniLight3D
+		if initial_lamp == null or not is_zero_approx(initial_lamp.light_energy):
+			push_error("Smoke test failed: street lamps should initialize switched off during daytime.")
+			quit(1)
+			return
+	weather_controller.set("day_time", 0.0)
+	weather_controller.call("_process", 0.01)
+	for street_light: Node in street_lights:
+		var night_lamp := street_light as OmniLight3D
+		if night_lamp == null or not is_equal_approx(night_lamp.light_energy, 1.35):
+			push_error("Smoke test failed: street lamps did not illuminate during the night cycle.")
+			quit(1)
+			return
+	weather_controller.set("day_time", 12.0)
+	weather_controller.call("_process", 0.01)
+	for street_light: Node in street_lights:
+		var daytime_lamp := street_light as OmniLight3D
+		if daytime_lamp == null or not is_zero_approx(daytime_lamp.light_energy):
+			push_error("Smoke test failed: street lamps did not switch off during daytime.")
+			quit(1)
+			return
+	weather_controller.set("day_time", 10.0)
+	weather_controller.call("_process", 0.01)
 	weather_controller.call("cycle_weather")
 	weather_controller.call("cycle_weather")
 	weather_controller.call("_process", 2.0)
