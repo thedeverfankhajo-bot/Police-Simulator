@@ -128,7 +128,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 
- 	var building_scene := load("res://scenes/city/city_building.tscn") as PackedScene
+	var building_scene := load("res://scenes/city/city_building.tscn") as PackedScene
 	if building_scene == null:
 		push_error("Smoke test failed: reusable city building scene could not be loaded.")
 		quit(1)
