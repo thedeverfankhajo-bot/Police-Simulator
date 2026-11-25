@@ -12,6 +12,10 @@ var fog_density: float = 0.003
 @export_range(0.05, 2.0, 0.05) var wetness_transition_speed: float = 0.8
 var surface_wetness: float = 0.0
 var _target_surface_wetness: float = 0.0
+@export_range(0.0, 23.5, 0.5) var street_lights_on_hour: float = 18.5
+@export_range(0.0, 23.5, 0.5) var street_lights_off_hour: float = 6.0
+@export_range(0.1, 4.0, 0.05) var street_light_energy: float = 1.35
+var _street_lighting_enabled: bool = false
 
 const WEATHER := [
 	{"name":"sunny","key":"weather_sunny","energy":1.05,"fog":0.001,"rain":false,"wetness":0.0},
@@ -28,12 +32,14 @@ func configure(light: DirectionalLight3D, world: WorldEnvironment, particles: GP
 	environment = world
 	rain_particles = particles
 	_apply_weather()
+	_update_street_lighting()
 
 func _process(delta: float) -> void:
 	if not is_finite(delta) or delta <= 0.0:
 		return
 	elapsed += delta
 	day_time = fposmod(day_time + delta * 0.025, 24.0)
+	_update_street_lighting()
 	var next_wetness := move_toward(surface_wetness, _target_surface_wetness, wetness_transition_speed * delta)
 	if not is_equal_approx(next_wetness, surface_wetness):
 		surface_wetness = next_wetness
@@ -46,6 +52,21 @@ func _process(delta: float) -> void:
 	if environment and environment.environment:
 		var darkness := clampf(1.0 - maxf(sin((day_time / 24.0) * TAU), 0.0), 0.0, 1.0)
 		environment.environment.ambient_light_energy = lerpf(0.6, 0.18, darkness)
+
+func _update_street_lighting() -> void:
+	if not is_inside_tree():
+		return
+	var night_duration := fposmod(street_lights_off_hour - street_lights_on_hour, 24.0)
+	var elapsed_since_on := fposmod(day_time - street_lights_on_hour, 24.0)
+	var should_be_enabled := night_duration > 0.0 and elapsed_since_on < night_duration
+	if should_be_enabled == _street_lighting_enabled:
+		return
+	_street_lighting_enabled = should_be_enabled
+	var target_energy := street_light_energy if should_be_enabled else 0.0
+	for candidate: Node in get_tree().get_nodes_in_group("street_lights"):
+		var lamp := candidate as OmniLight3D
+		if lamp != null:
+			lamp.light_energy = target_energy
 
 func cycle_weather() -> void:
 	weather_index = (weather_index + 1) % WEATHER.size()
