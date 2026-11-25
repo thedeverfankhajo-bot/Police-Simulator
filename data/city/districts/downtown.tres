@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/city_district_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+district_id = "downtown"
+display_name_fa = "مرکز شهر"
+display_name_en = "Downtown"
+center = Vector3(-27,0,-75)
+half_extents = Vector2(36,34)
+priority = 70

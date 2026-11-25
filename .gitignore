@@ -1,0 +1,39 @@
+# Downloaded installers and reports
+tools/downloads/
+downloads/
+artifacts/
+
+# Build output
+Build/
+Builds/
+dist/
+bin/
+obj/
+Library/
+Temp/
+Logs/
+UserSettings/
+
+# IDE/editor
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.p12
+*.keystore
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Godot editor/import cache
+.godot/
+*.translation

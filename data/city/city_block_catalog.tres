@@ -1,0 +1,63 @@
+[gd_resource type="Resource" script_class="CityBlockCatalog" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/city_block_catalog.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world/city_block_definition.gd" id="2"]
+
+[sub_resource type="Resource" id="Residential"]
+script = ExtResource("2")
+block_id = "residential_core"
+district_id = "residential"
+building_positions = PackedVector3Array(-84, 0, 16, -65, 0, 18, -84, 0, 39, -65, 0, 42, -84, 0, 68, -65, 0, 68)
+footprint = Vector2(13, 14)
+minimum_height = 8.0
+maximum_height = 14.0
+facade_palette = Array[Color]([Color(0.68, 0.57, 0.43, 1), Color(0.76, 0.71, 0.61, 1), Color(0.49, 0.56, 0.56, 1)])
+random_seed = 101
+
+[sub_resource type="Resource" id="Commercial"]
+script = ExtResource("2")
+block_id = "commercial_strip"
+district_id = "commercial"
+building_positions = PackedVector3Array(65, 0, -85, 86, 0, -85, 65, 0, -64, 86, 0, -64, 65, 0, -35, 86, 0, -35)
+footprint = Vector2(14, 14)
+minimum_height = 18.0
+maximum_height = 31.0
+facade_palette = Array[Color]([Color(0.3, 0.43, 0.51, 1), Color(0.48, 0.52, 0.55, 1), Color(0.7, 0.59, 0.43, 1)])
+random_seed = 202
+
+[sub_resource type="Resource" id="Downtown"]
+script = ExtResource("2")
+block_id = "downtown_towers"
+district_id = "downtown"
+building_positions = PackedVector3Array(-37, 0, -86, -17, 0, -86, -37, 0, -64, -17, 0, -64)
+footprint = Vector2(15, 15)
+minimum_height = 17.0
+maximum_height = 27.0
+facade_palette = Array[Color]([Color(0.47, 0.51, 0.53, 1), Color(0.56, 0.43, 0.35, 1), Color(0.32, 0.43, 0.49, 1)])
+random_seed = 303
+
+[sub_resource type="Resource" id="Industrial"]
+script = ExtResource("2")
+block_id = "industrial_yard"
+district_id = "industrial"
+building_positions = PackedVector3Array(64, 0, 64, 86, 0, 64, 64, 0, 86, 86, 0, 86, 30, 0, 85)
+footprint = Vector2(17, 17)
+minimum_height = 8.0
+maximum_height = 12.0
+facade_palette = Array[Color]([Color(0.39, 0.43, 0.42, 1), Color(0.48, 0.42, 0.34, 1), Color(0.35, 0.4, 0.46, 1)])
+random_seed = 404
+
+[sub_resource type="Resource" id="Civic"]
+script = ExtResource("2")
+block_id = "civic_services"
+district_id = "civic_services"
+building_positions = PackedVector3Array(-86, 0, -35, -65, 0, -35, 28, 0, -83, 28, 0, -62)
+footprint = Vector2(14, 15)
+minimum_height = 9.0
+maximum_height = 17.0
+facade_palette = Array[Color]([Color(0.56, 0.59, 0.57, 1), Color(0.67, 0.63, 0.55, 1)])
+random_seed = 505
+
+[resource]
+script = ExtResource("1")
+blocks = Array[ExtResource("2")]([SubResource("Residential"), SubResource("Commercial"), SubResource("Downtown"), SubResource("Industrial"), SubResource("Civic")])
