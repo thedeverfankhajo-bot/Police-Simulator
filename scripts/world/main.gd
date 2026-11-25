@@ -19,6 +19,7 @@ var missions: Variant
 var weather: Variant
 var traffic: Variant
 var city_manager: Node
+var city_block_manager: CityBlockManager
 var sun: DirectionalLight3D
 var environment_node: WorldEnvironment
 var rain: GPUParticles3D
@@ -47,6 +48,8 @@ func _process(delta: float) -> void:
 		rain.global_position = player.global_position + Vector3(0,10,0)
 	if is_instance_valid(city_manager):
 		city_manager.call("update_player_position", _current_position(), LocaleManager.language)
+	if is_instance_valid(city_block_manager):
+		city_block_manager.update_player_position(_current_position())
 	_update_hud()
 	_update_prompt()
 	if Input.is_action_just_pressed("interact") and not hud.is_panel_open():
@@ -141,12 +144,12 @@ func _build_city() -> void:
 	_bench(Vector3(-19,0.2,25))
 	_sign(Vector3(-25,2.4,6),"NORTH PARK",Color(0.3,0.6,0.39))
 
-	var block_manager := CITY_BLOCK_MANAGER_SCENE.instantiate()
-	if block_manager == null:
+	city_block_manager = CITY_BLOCK_MANAGER_SCENE.instantiate() as CityBlockManager
+	if city_block_manager == null:
 		push_error("City block manager scene could not be instantiated.")
 	else:
-		block_manager.name = "CityBlockManager"
-		add_child(block_manager)
+		city_block_manager.name = "CityBlockManager"
+		add_child(city_block_manager)
 	for p in [Vector3(0,0.2,0),Vector3(50,0.2,0),Vector3(-50,0.2,0),Vector3(0,0.2,50),Vector3(0,0.2,-50)]:
 		_traffic_light(p)
 	for p in [Vector3(-10,0,17),Vector3(10,0,17),Vector3(49,0,-16),Vector3(-49,0,16),Vector3(15,0,-50),Vector3(-15,0,50)]:

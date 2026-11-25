@@ -288,18 +288,26 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the data-driven city block manager was not added to the world.")
 		quit(1)
 		return
-	if int(block_manager.call("get_block_count")) != 5:
-		push_error("Smoke test failed: all five data-driven city blocks were not loaded.")
+	if int(block_manager.call("get_definition_count")) != 5:
+		push_error("Smoke test failed: the five city block definitions were not registered.")
 		quit(1)
 		return
-	if int(block_manager.call("get_building_count")) != 25:
-		push_error("Smoke test failed: the city block catalog did not spawn exactly 25 buildings.")
+	if int(block_manager.call("get_block_count")) != 4:
+		push_error("Smoke test failed: nearby city blocks were not streamed into the world.")
+		quit(1)
+		return
+	if int(block_manager.call("get_building_count")) != 21:
+		push_error("Smoke test failed: the active city blocks did not spawn the expected 21 nearby buildings.")
+		quit(1)
+		return
+	if bool(block_manager.call("is_block_loaded", "downtown_towers")):
+		push_error("Smoke test failed: the distant downtown block was loaded outside the streaming radius.")
 		quit(1)
 		return
 	var expected_district_buildings := {
 		"residential": 6,
 		"commercial": 6,
-		"downtown": 4,
+		"downtown": 0,
 		"industrial": 5,
 		"civic_services": 4
 	}
@@ -309,6 +317,32 @@ func _initialize() -> void:
 			push_error("Smoke test failed: building count for district %s was %d." % [district_id, actual_count])
 			quit(1)
 			return
+
+	# Verify lazy loading, hysteresis and unloading as the officer moves between districts.
+	block_manager.call("update_player_position", Vector3(-17.0, 0.2, -64.0))
+	if not bool(block_manager.call("is_block_loaded", "downtown_towers")):
+		push_error("Smoke test failed: downtown block did not load when the officer approached it.")
+		quit(1)
+		return
+	if int(block_manager.call("get_district_building_count", "downtown")) != 4:
+		push_error("Smoke test failed: streamed downtown buildings were not counted correctly.")
+		quit(1)
+		return
+	block_manager.call("update_player_position", Vector3(-17.0, 0.2, 56.0))
+	if not bool(block_manager.call("is_block_loaded", "downtown_towers")):
+		push_error("Smoke test failed: a loaded block was unloaded inside the hysteresis band.")
+		quit(1)
+		return
+	block_manager.call("update_player_position", Vector3(500.0, 0.2, 500.0))
+	if int(block_manager.call("get_block_count")) != 0 or int(block_manager.call("get_building_count")) != 0:
+		push_error("Smoke test failed: distant city blocks were not unloaded.")
+		quit(1)
+		return
+	block_manager.call("update_player_position", Vector3(20.0, 0.2, 45.0))
+	if int(block_manager.call("get_block_count")) != 4 or int(block_manager.call("get_building_count")) != 21:
+		push_error("Smoke test failed: the starting city blocks did not reload after returning.")
+		quit(1)
+		return
 
 	var building_scene := load("res://scenes/city/city_building.tscn") as PackedScene
 	if building_scene == null:
