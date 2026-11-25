@@ -226,6 +226,7 @@ func show_dispatch(mission: Dictionary) -> void:
 	dispatch_panel.visible = true
 	overlay.visible = false
 	_set_mouse(true)
+	panel_opened.emit()
 
 func show_citizen_dialog() -> void:
 	_overlay_kind = ""
