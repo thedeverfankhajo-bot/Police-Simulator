@@ -114,10 +114,16 @@ func is_valid_mission_data(mission: Dictionary) -> bool:
 	if not is_finite(float(trust_value)) or float(trust_value) < -100.0 or float(trust_value) > 100.0:
 		return false
 
-	if mission.has("objective_steps") and not mission["objective_steps"] is Array:
+	var raw_objective_steps: Variant = mission.get("objective_steps", DEFAULT_OBJECTIVE_STEPS)
+	if not raw_objective_steps is Array:
 		return false
+	if raw_objective_steps.is_empty() or raw_objective_steps.size() > 8:
+		return false
+	for raw_step: Variant in raw_objective_steps:
+		if not raw_step is Dictionary:
+			return false
 	var objective_steps := get_objective_steps(mission)
-	if objective_steps.is_empty() or objective_steps.size() > 8:
+	if objective_steps.size() != raw_objective_steps.size():
 		return false
 	var objective_ids: Dictionary = {}
 	for step: Dictionary in objective_steps:
@@ -144,19 +150,22 @@ func is_valid_mission_data(mission: Dictionary) -> bool:
 		if objective_index < 0 or objective_index >= objective_steps.size():
 			return false
 
-	if mission.has("completed_objectives"):
-		var completed_value: Variant = mission["completed_objectives"]
+	var has_objective_index := mission.has("objective_index")
+	if mission.has("completed_objectives") or has_objective_index:
+		var completed_value: Variant = mission.get("completed_objectives", null)
 		if not completed_value is Array:
 			return false
-		if mission.has("objective_index") and completed_value.size() != objective_index:
+		if not has_objective_index:
+			return completed_value.is_empty()
+		if completed_value.size() != objective_index:
 			return false
-		var completed_ids: Dictionary = {}
-		for completed_id: Variant in completed_value:
-			if not completed_id is String or not objective_ids.has(completed_id):
+		for completed_index in range(completed_value.size()):
+			var completed_id: Variant = completed_value[completed_index]
+			if not completed_id is String:
 				return false
-			if completed_ids.has(completed_id):
+			var expected_id := str(objective_steps[completed_index].get("id", ""))
+			if completed_id != expected_id:
 				return false
-			completed_ids[completed_id] = true
 
 	return true
 
