@@ -32,5 +32,18 @@ func _initialize() -> void:
 		push_error("Smoke test failed: player services, vehicle, or citizens were not registered.")
 		quit(1)
 		return
-	print("POLICE SIMULATOR 3D smoke test passed: main world, managers, HUD, mission data, and interactables initialized.")
+	var hud: Node = instance.get_node("GameHUD")
+	hud.call("show_overlay", "map")
+	if not bool(hud.call("is_panel_open")):
+		push_error("Smoke test failed: map overlay did not open.")
+		quit(1)
+		return
+	hud.call("close_panels")
+	hud.call("show_overlay", "pause")
+	if not bool(hud.call("is_panel_open")):
+		push_error("Smoke test failed: pause overlay did not open.")
+		quit(1)
+		return
+	hud.call("close_panels")
+	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, interactables, and map/pause overlays initialized.")
 	quit(0)

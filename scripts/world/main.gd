@@ -271,13 +271,18 @@ func _build_hud() -> void:
 
 func _restore_save() -> void:
 	var data := SaveManager.load_game()
-	if not data.is_empty():
-		player.global_position = SaveManager.saved_position(data,player.global_position)
-		if not GameState.current_mission.is_empty():
+	if data.is_empty():
+		return
+	player.global_position = SaveManager.saved_position(data, player.global_position)
+	missions.next_index = clampi(GameState.mission_index, 0, missions.catalogue.size())
+	if not GameState.current_mission.is_empty():
+		if missions.is_valid_mission_data(GameState.current_mission):
 			missions.active_mission = GameState.current_mission.duplicate(true)
 			missions.active = true
-			missions.next_index = GameState.mission_index
 			_create_marker()
+		else:
+			push_warning("Saved active mission is invalid and was cleared.")
+			GameState.current_mission.clear()
 
 func _current_position() -> Vector3:
 	return patrol_car.global_position if driving else player.global_position

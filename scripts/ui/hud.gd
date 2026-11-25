@@ -28,7 +28,7 @@ var _volume_slider: HSlider
 var _dialog_copy: Label
 var _root: Control
 var paused: bool = false
-var _dialog_copy: Label
+var _overlay_kind: String = ""
 
 func _ready() -> void:
 	_build()
@@ -212,6 +212,7 @@ func set_prompt(value: String) -> void:
 	hud_prompt.text = value
 
 func show_dispatch(mission: Dictionary) -> void:
+	_overlay_kind = ""
 	if mission.is_empty():
 		dispatch_title.text = LocaleManager.tr("no_mission")
 		dispatch_description.text = LocaleManager.tr("mission_none")
@@ -225,6 +226,7 @@ func show_dispatch(mission: Dictionary) -> void:
 	_set_mouse(true)
 
 func show_citizen_dialog() -> void:
+	_overlay_kind = ""
 	dialogue.visible = true
 	_set_mouse(true)
 	panel_opened.emit()
@@ -232,7 +234,14 @@ func show_citizen_dialog() -> void:
 func show_notification(message: String) -> void:
 	hud_prompt.text = message
 
+func show_overlay(kind: String) -> void:
+	if overlay.visible and _overlay_kind == kind:
+		close_panels()
+		return
+	_show_overlay(kind)
+
 func _show_overlay(kind: String) -> void:
+	_overlay_kind = kind
 	var title := kind
 	var body := ""
 	match kind:
@@ -249,6 +258,9 @@ func _show_overlay(kind: String) -> void:
 		"profile":
 			title = LocaleManager.tr("profile")
 			body = "%s: %d\n%s: %d\n%s: %d%%\n%s: %d\nامتیاز: %d" % [LocaleManager.tr("level"), GameState.level, LocaleManager.tr("xp"), GameState.experience, LocaleManager.tr("trust"), GameState.public_trust, LocaleManager.tr("missions"), GameState.missions_completed, GameState.score]
+		"pause":
+			title = LocaleManager.tr("pause")
+			body = LocaleManager.tr("pause_message")
 		"settings":
 			title = LocaleManager.tr("settings_title")
 			body = "Graphics: Balanced\nAudio: Procedural patrol engine tone\nControls: WASD / Mouse / E\nAccessibility: فارسی / English"
@@ -262,6 +274,7 @@ func _show_overlay(kind: String) -> void:
 
 func close_panels() -> void:
 	var was_open := is_panel_open()
+	_overlay_kind = ""
 	dispatch_panel.visible = false
 	overlay.visible = false
 	dialogue.visible = false
@@ -280,7 +293,12 @@ func _refresh_stats() -> void:
 		hud_trust.text = "%s: %d%%" % [LocaleManager.tr("trust"), GameState.public_trust]
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE and is_panel_open():
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if event.keycode == KEY_ESCAPE and is_panel_open():
+		close_panels()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_M and overlay.visible and _overlay_kind == "map":
 		close_panels()
 		get_viewport().set_input_as_handled()
 

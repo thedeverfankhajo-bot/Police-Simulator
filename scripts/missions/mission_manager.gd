@@ -12,6 +12,7 @@ func _ready() -> void:
 	_load_catalogue()
 
 func _load_catalogue() -> void:
+	catalogue.clear()
 	var file := FileAccess.open("res://data/missions/missions.json", FileAccess.READ)
 	if file == null:
 		push_error("Mission data could not be opened.")
@@ -21,11 +22,43 @@ func _load_catalogue() -> void:
 	if not parsed is Dictionary:
 		push_error("Mission catalogue is invalid.")
 		return
+	if int(parsed.get("schema_version", -1)) != 1:
+		push_error("Unsupported mission catalogue schema version.")
+		return
 	var entries: Variant = parsed.get("missions", [])
-	if entries is Array:
-		for item: Variant in entries:
-			if item is Dictionary and item.has("id") and item.has("location"):
-				catalogue.append(item.duplicate(true))
+	if not entries is Array:
+		push_error("Mission catalogue entries must be an Array.")
+		return
+	var seen_ids: Dictionary = {}
+	for item: Variant in entries:
+		if not item is Dictionary:
+			push_warning("Skipping a mission entry that is not a Dictionary.")
+			continue
+		var mission: Dictionary = item
+		if not is_valid_mission_data(mission):
+			push_warning("Skipping invalid mission entry: %s" % str(mission.get("id", "<missing id>")))
+			continue
+		var mission_id := str(mission.get("id", "")).strip_edges()
+		if seen_ids.has(mission_id):
+			push_warning("Skipping duplicate mission id: %s" % mission_id)
+			continue
+		seen_ids[mission_id] = true
+		catalogue.append(mission.duplicate(true))
+	if catalogue.is_empty():
+		push_warning("Mission catalogue contains no valid entries.")
+
+func is_valid_mission_data(mission: Dictionary) -> bool:
+	var mission_id := str(mission.get("id", "")).strip_edges()
+	var mission_type := str(mission.get("type", "")).strip_edges()
+	var location: Variant = mission.get("location", null)
+	if mission_id.is_empty() or mission_type.is_empty():
+		return false
+	if not location is Array or location.size() != 3:
+		return false
+	for coordinate: Variant in location:
+		if not (coordinate is int or coordinate is float):
+			return false
+	return true
 
 func get_next_mission() -> Dictionary:
 	if next_index >= catalogue.size():
