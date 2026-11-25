@@ -1,5 +1,9 @@
 extends CharacterBody3D
 
+const FOLLOW_DISTANCE: float = 8.0
+const LANE_HALF_WIDTH: float = 2.4
+const MIN_HEADING_ALIGNMENT: float = 0.75
+
 var route: Array[Vector3] = []
 var route_index: int = 0
 var cruise_speed: float = 8.0
@@ -54,8 +58,7 @@ func _physics_process(delta: float) -> void:
 		offset = target - global_position
 		offset.y = 0.0
 	var direction := offset.normalized()
-	var ahead := global_position + direction * 3.4
-	_stopped = _nearby_vehicle_ahead(ahead) or _red_light_nearby(global_position)
+	_stopped = _nearby_vehicle_ahead(direction) or _red_light_nearby(global_position)
 	var speed := 0.0 if _stopped else cruise_speed
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
@@ -64,11 +67,31 @@ func _physics_process(delta: float) -> void:
 		rotation.y = lerp_angle(rotation.y, atan2(-direction.x, -direction.z), delta * 2.0)
 	move_and_slide()
 
-func _nearby_vehicle_ahead(point: Vector3) -> bool:
+func is_vehicle_ahead_in_lane(observer_position: Vector3, observer_forward: Vector3, other_position: Vector3, other_forward: Vector3) -> bool:
+	var forward_2d := Vector2(observer_forward.x, observer_forward.z)
+	var other_forward_2d := Vector2(other_forward.x, other_forward.z)
+	if forward_2d.length_squared() <= 0.0001 or other_forward_2d.length_squared() <= 0.0001:
+		return false
+
+	forward_2d = forward_2d.normalized()
+	other_forward_2d = other_forward_2d.normalized()
+	if forward_2d.dot(other_forward_2d) < MIN_HEADING_ALIGNMENT:
+		return false
+
+	var offset_2d := Vector2(other_position.x - observer_position.x, other_position.z - observer_position.z)
+	var longitudinal_distance := offset_2d.dot(forward_2d)
+	if longitudinal_distance <= 0.0 or longitudinal_distance > FOLLOW_DISTANCE:
+		return false
+
+	var lateral_distance := absf(forward_2d.x * offset_2d.y - forward_2d.y * offset_2d.x)
+	return lateral_distance <= LANE_HALF_WIDTH
+
+func _nearby_vehicle_ahead(forward: Vector3) -> bool:
 	for other in get_tree().get_nodes_in_group("traffic_cars"):
-		if other == self or not is_instance_valid(other):
+		if other == self or not is_instance_valid(other) or not other is Node3D:
 			continue
-		if other.global_position.distance_to(point) < 4.2:
+		var other_forward := -other.global_transform.basis.z
+		if is_vehicle_ahead_in_lane(global_position, forward, other.global_position, other_forward):
 			return true
 	return false
 
