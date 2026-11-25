@@ -125,6 +125,13 @@ func _initialize() -> void:
 		push_error("Smoke test failed: a valid version-one save payload was rejected: %s" % save_validation_error)
 		quit(1)
 		return
+
+	var serialized_payload: Variant = JSON.parse_string(JSON.stringify(save_payload))
+	var serialized_validation_error := str(save_manager.call("get_save_payload_validation_error", serialized_payload))
+	if not serialized_validation_error.is_empty():
+		push_error("Smoke test failed: a JSON round-trip save payload was rejected: %s" % serialized_validation_error)
+		quit(1)
+		return
 	var invalid_save := save_payload.duplicate(true)
 	invalid_save["audio_volume"] = 2.0
 	if bool(save_manager.call("is_valid_save_payload", invalid_save)):

@@ -60,8 +60,11 @@ func get_save_payload_validation_error(value: Variant) -> String:
 			return "required field is missing: %s" % field_name
 
 	var version_value: Variant = payload["version"]
-	if not version_value is int or int(version_value) != SAVE_VERSION:
-		return "version must be integer %d" % SAVE_VERSION
+	if not (version_value is int or version_value is float):
+		return "version must be numeric"
+	var numeric_version := float(version_value)
+	if not is_finite(numeric_version) or not is_equal_approx(numeric_version, float(SAVE_VERSION)):
+		return "version must equal %d" % SAVE_VERSION
 
 	var timestamp_value: Variant = payload["saved_at"]
 	if not timestamp_value is String or timestamp_value.strip_edges().is_empty():
@@ -86,11 +89,13 @@ func get_save_payload_validation_error(value: Variant) -> String:
 	}
 	for field_name: String in integer_ranges:
 		var field_value: Variant = payload[field_name]
-		if not field_value is int:
-			return "%s must be an integer" % field_name
+		if not (field_value is int or field_value is float):
+			return "%s must be numeric" % field_name
 		var numeric_value := float(field_value)
 		var allowed_range: Vector2 = integer_ranges[field_name]
-		if not is_finite(numeric_value) or numeric_value < allowed_range.x or numeric_value > allowed_range.y:
+		if not is_finite(numeric_value) or not is_equal_approx(numeric_value, floorf(numeric_value)):
+			return "%s must be a finite whole number" % field_name
+		if numeric_value < allowed_range.x or numeric_value > allowed_range.y:
 			return "%s is outside its allowed range" % field_name
 
 	for field_name: String in ["play_seconds", "audio_volume"]:
