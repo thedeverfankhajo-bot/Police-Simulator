@@ -393,6 +393,26 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var weather_controller: Node = instance.get_node("WeatherController")
+	var street_lamp_components: Array = instance.get_tree().get_nodes_in_group("city_street_lamp_components")
+	if street_lamp_components.size() != 6:
+		push_error("Smoke test failed: all six modular street light components were not instantiated.")
+		quit(1)
+		return
+	for lamp_component: Node3D in street_lamp_components:
+		var pole := lamp_component.get_node_or_null("Structure/Pole") as MeshInstance3D
+		var arm := lamp_component.get_node_or_null("Structure/Arm") as MeshInstance3D
+		var luminaire := lamp_component.get_node_or_null("Structure/Luminaire") as MeshInstance3D
+		var diffuser := lamp_component.get_node_or_null("Structure/Diffuser") as MeshInstance3D
+		var collision := lamp_component.get_node_or_null("StreetLightBody/CollisionShape3D") as CollisionShape3D
+		var light_source := lamp_component.get_node_or_null("LightSource") as OmniLight3D
+		if pole == null or arm == null or luminaire == null or diffuser == null or collision == null or collision.shape == null:
+			push_error("Smoke test failed: a modular street light is missing structural geometry or collision.")
+			quit(1)
+			return
+		if light_source == null or not light_source.is_in_group("street_lights") or not is_zero_approx(light_source.light_energy):
+			push_error("Smoke test failed: a modular street light has no registered, day-safe light source.")
+			quit(1)
+			return
 	var street_lights: Array = instance.get_tree().get_nodes_in_group("street_lights")
 	if street_lights.size() != 6:
 		push_error("Smoke test failed: all six city street lamps were not registered.")
