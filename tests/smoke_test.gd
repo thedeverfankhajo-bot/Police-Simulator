@@ -272,6 +272,33 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	var block_manager: Node = instance.get_node_or_null("CityBlockManager")
+	if block_manager == null:
+		push_error("Smoke test failed: the data-driven city block manager was not added to the world.")
+		quit(1)
+		return
+	if int(block_manager.call("get_block_count")) != 5:
+		push_error("Smoke test failed: all five data-driven city blocks were not loaded.")
+		quit(1)
+		return
+	if int(block_manager.call("get_building_count")) != 25:
+		push_error("Smoke test failed: the city block catalog did not spawn exactly 25 buildings.")
+		quit(1)
+		return
+	var expected_district_buildings := {
+		"residential": 6,
+		"commercial": 6,
+		"downtown": 4,
+		"industrial": 5,
+		"civic_services": 4
+	}
+	for district_id: String in expected_district_buildings:
+		var actual_count := int(block_manager.call("get_district_building_count", district_id))
+		if actual_count != int(expected_district_buildings[district_id]):
+			push_error("Smoke test failed: building count for district %s was %d." % [district_id, actual_count])
+			quit(1)
+			return
+
 	var building_scene := load("res://scenes/city/city_building.tscn") as PackedScene
 	if building_scene == null:
 		push_error("Smoke test failed: reusable city building scene could not be loaded.")

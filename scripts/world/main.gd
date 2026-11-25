@@ -8,7 +8,7 @@ const MISSION_SCRIPT = preload("res://scripts/missions/mission_manager.gd")
 const WEATHER_SCRIPT = preload("res://scripts/environment/weather_controller.gd")
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic/traffic_manager.gd")
 const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.tscn")
-const CITY_BUILDING_SCENE: PackedScene = preload("res://scenes/city/city_building.tscn")
+const CITY_BLOCK_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_block_manager.tscn")
 const CITY_ROAD_SEGMENT_SCENE: PackedScene = preload("res://scenes/city/city_road_segment.tscn")
 const TRAFFIC_SIGNAL_SCENE: PackedScene = preload("res://scenes/city/traffic_signal.tscn")
 
@@ -116,10 +116,7 @@ func _build_environment() -> void:
 	add_child(rain)
 
 func _build_city() -> void:
-	var asphalt := _mat(Color(0.105,0.125,0.14),0.96)
-	var sidewalk := _mat(Color(0.43,0.46,0.46),0.92)
 	var grass := _mat(Color(0.17,0.29,0.19),0.98)
-	var paint := _mat(Color(0.82,0.77,0.61),0.74)
 	_box(self,Vector3(0,-0.28,0),Vector3(220,0.5,220),grass,true)
 	var navigation_region := NavigationRegion3D.new()
 	var navigation_mesh := NavigationMesh.new()
@@ -144,20 +141,12 @@ func _build_city() -> void:
 	_bench(Vector3(-19,0.2,25))
 	_sign(Vector3(-25,2.4,6),"NORTH PARK",Color(0.3,0.6,0.39))
 
-	var homes := [Vector3(-84,0,16),Vector3(-65,0,18),Vector3(-84,0,39),Vector3(-65,0,42),Vector3(-84,0,68),Vector3(-65,0,68)]
-	for p in homes:
-		_building(p,Vector3(13,randf_range(8,14),14),[Color(0.68,0.57,0.43),Color(0.76,0.71,0.61),Color(0.49,0.56,0.56)],"RESIDENTIAL")
-	var shops := [Vector3(65,0,-85),Vector3(86,0,-85),Vector3(65,0,-64),Vector3(86,0,-64),Vector3(65,0,-35),Vector3(86,0,-35)]
-	for p in shops:
-		_building(p,Vector3(14,randf_range(18,31),14),[Color(0.3,0.43,0.51),Color(0.48,0.52,0.55),Color(0.7,0.59,0.43)],"COMMERCIAL")
-	var downtown := [Vector3(-37,0,-86),Vector3(-17,0,-86),Vector3(-37,0,-64),Vector3(-17,0,-64)]
-	for p in downtown:
-		_building(p,Vector3(15,randf_range(17,27),15),[Color(0.47,0.51,0.53),Color(0.56,0.43,0.35),Color(0.32,0.43,0.49)],"DOWNTOWN")
-	var factories := [Vector3(64,0,64),Vector3(86,0,64),Vector3(64,0,86),Vector3(86,0,86),Vector3(30,0,85)]
-	for p in factories:
-		_building(p,Vector3(17,randf_range(8,12),17),[Color(0.39,0.43,0.42),Color(0.48,0.42,0.34),Color(0.35,0.4,0.46)],"INDUSTRIAL")
-	for p in [Vector3(-86,0,-35),Vector3(-65,0,-35),Vector3(28,0,-83),Vector3(28,0,-62)]:
-		_building(p,Vector3(14,randf_range(9,17),15),[Color(0.56,0.59,0.57),Color(0.67,0.63,0.55)],"CIVIC")
+	var block_manager := CITY_BLOCK_MANAGER_SCENE.instantiate()
+	if block_manager == null:
+		push_error("City block manager scene could not be instantiated.")
+	else:
+		block_manager.name = "CityBlockManager"
+		add_child(block_manager)
 	for p in [Vector3(0,0.2,0),Vector3(50,0.2,0),Vector3(-50,0.2,0),Vector3(0,0.2,50),Vector3(0,0.2,-50)]:
 		_traffic_light(p)
 	for p in [Vector3(-10,0,17),Vector3(10,0,17),Vector3(49,0,-16),Vector3(-49,0,16),Vector3(15,0,-50),Vector3(-15,0,50)]:
@@ -471,20 +460,6 @@ func _district(p: Vector3) -> String:
 	if not is_instance_valid(city_manager):
 		return "ناحیه شمالی" if LocaleManager.language == "fa" else "North District"
 	return str(city_manager.call("get_district_label_at", p, LocaleManager.language))
-
-func _building(pos: Vector3, size: Vector3, palette: Array, district: String) -> void:
-	if palette.is_empty():
-		push_warning("Skipping a building with an empty facade palette: %s" % district)
-		return
-	var facade_color: Color = palette[randi() % palette.size()]
-	var building := CITY_BUILDING_SCENE.instantiate() as CityBuilding
-	if building == null:
-		push_error("City building scene could not be instantiated.")
-		return
-	building.name = "%s_Building_%03d" % [district.to_lower(), get_child_count()]
-	building.position = pos
-	building.configure(size, facade_color, district, randi())
-	add_child(building)
 
 func _add_road_segment(world_position: Vector3, width: float, orientation: CityRoadSegment.Axis) -> void:
 	var segment := CITY_ROAD_SEGMENT_SCENE.instantiate() as CityRoadSegment
