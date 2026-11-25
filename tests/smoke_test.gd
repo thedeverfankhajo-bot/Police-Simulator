@@ -69,6 +69,42 @@ func _initialize() -> void:
 			push_error("Smoke test failed: an invalid mission definition was accepted.")
 			quit(1)
 			return
+
+	var malformed_objectives := valid_mission_probe.duplicate(true)
+	malformed_objectives["objective_steps"] = [
+		{"id": "inspect", "title_fa": "بررسی", "title_en": "Inspect"},
+		"not_a_step"
+	]
+	if bool(manager.call("is_valid_mission_data", malformed_objectives)):
+		push_error("Smoke test failed: a mission with a non-dictionary objective step was accepted.")
+		quit(1)
+		return
+
+	var active_progress_probe := valid_mission_probe.duplicate(true)
+	active_progress_probe["objective_steps"] = [
+		{"id": "inspect", "title_fa": "بررسی محل", "title_en": "Inspect location"},
+		{"id": "record", "title_fa": "ثبت نتیجه", "title_en": "Record outcome"}
+	]
+	active_progress_probe["objective_index"] = 1
+	active_progress_probe["completed_objectives"] = ["inspect"]
+	if not bool(manager.call("is_valid_mission_data", active_progress_probe)):
+		push_error("Smoke test failed: a valid sequential mission progress state was rejected.")
+		quit(1)
+		return
+
+	var out_of_order_progress := active_progress_probe.duplicate(true)
+	out_of_order_progress["completed_objectives"] = ["record"]
+	if bool(manager.call("is_valid_mission_data", out_of_order_progress)):
+		push_error("Smoke test failed: out-of-order completed mission objectives were accepted.")
+		quit(1)
+		return
+
+	var missing_progress_history := active_progress_probe.duplicate(true)
+	missing_progress_history.erase("completed_objectives")
+	if bool(manager.call("is_valid_mission_data", missing_progress_history)):
+		push_error("Smoke test failed: mission progress without its completed-objective history was accepted.")
+		quit(1)
+		return
 	var fallback_spawn := Vector3(20.0, 0.0, 28.0)
 	var position_sanitizer := SavePositionSanitizer.new()
 	var clamped_position: Array[float] = position_sanitizer.sanitize_position_data([120.0, 1.5, -130.0], fallback_spawn)
