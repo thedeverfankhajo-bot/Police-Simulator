@@ -16,7 +16,19 @@
       "priority": "عادی",
       "reward": 120,
       "trust": 3,
-      "target_label": "راهنمایی شهروند"
+      "target_label": "راهنمایی شهروند",
+      "objective_steps": [
+        {
+          "id": "meet_resident",
+          "title_fa": "با شهروند به محل گفت‌وگو مراجعه کنید",
+          "title_en": "Meet the resident at the reported location"
+        },
+        {
+          "id": "record_directions",
+          "title_fa": "نتیجهٔ راهنمایی را ثبت کنید",
+          "title_en": "Record the directions provided"
+        }
+      ]
     },
     {
       "id": "TRF-002",
@@ -33,7 +45,19 @@
       "priority": "عادی",
       "reward": 150,
       "trust": 4,
-      "target_label": "مانع پیاده‌رو"
+      "target_label": "مانع پیاده‌رو",
+      "objective_steps": [
+        {
+          "id": "inspect_obstruction",
+          "title_fa": "انسداد پیاده‌رو را بررسی کنید",
+          "title_en": "Inspect the sidewalk obstruction"
+        },
+        {
+          "id": "record_clearance",
+          "title_fa": "بازگشایی مسیر عبور را ثبت کنید",
+          "title_en": "Record that the pedestrian route is clear"
+        }
+      ]
     },
     {
       "id": "CIV-003",
@@ -50,7 +74,19 @@
       "priority": "پایین",
       "reward": 110,
       "trust": 3,
-      "target_label": "کیف گمشده"
+      "target_label": "کیف گمشده",
+      "objective_steps": [
+        {
+          "id": "inspect_item",
+          "title_fa": "شیء پیدا شده را بررسی کنید",
+          "title_en": "Inspect the found item"
+        },
+        {
+          "id": "register_item",
+          "title_fa": "مشخصات شیء را ثبت کنید",
+          "title_en": "Register the item's details"
+        }
+      ]
     },
     {
       "id": "CITY-004",
@@ -67,7 +103,19 @@
       "priority": "عادی",
       "reward": 130,
       "trust": 3,
-      "target_label": "چراغ خاموش"
+      "target_label": "چراغ خاموش",
+      "objective_steps": [
+        {
+          "id": "inspect_light",
+          "title_fa": "چراغ خاموش را بررسی کنید",
+          "title_en": "Inspect the street light"
+        },
+        {
+          "id": "request_maintenance",
+          "title_fa": "درخواست تعمیر را ثبت کنید",
+          "title_en": "Submit a maintenance request"
+        }
+      ]
     },
     {
       "id": "CIV-005",
@@ -84,7 +132,19 @@
       "priority": "عادی",
       "reward": 125,
       "trust": 3,
-      "target_label": "بازدیدکننده پارک"
+      "target_label": "بازدیدکننده پارک",
+      "objective_steps": [
+        {
+          "id": "approach_visitor",
+          "title_fa": "به بازدیدکنندهٔ پارک مراجعه کنید",
+          "title_en": "Approach the park visitor"
+        },
+        {
+          "id": "record_directions",
+          "title_fa": "راهنمایی مسیر خروج را ثبت کنید",
+          "title_en": "Record the exit directions"
+        }
+      ]
     },
     {
       "id": "TRF-006",
@@ -101,7 +161,19 @@
       "priority": "عادی",
       "reward": 145,
       "trust": 4,
-      "target_label": "گزارش پارک خودرو"
+      "target_label": "گزارش پارک خودرو",
+      "objective_steps": [
+        {
+          "id": "inspect_parking",
+          "title_fa": "گزارش توقف نامناسب را بررسی کنید",
+          "title_en": "Inspect the parking complaint"
+        },
+        {
+          "id": "record_resolution",
+          "title_fa": "نتیجهٔ رسیدگی را ثبت کنید",
+          "title_en": "Record the parking resolution"
+        }
+      ]
     },
     {
       "id": "CITY-007",
@@ -118,7 +190,19 @@
       "priority": "پایین",
       "reward": 115,
       "trust": 3,
-      "target_label": "نیمکت آسیب‌دیده"
+      "target_label": "نیمکت آسیب‌دیده",
+      "objective_steps": [
+        {
+          "id": "inspect_bench",
+          "title_fa": "نیمکت آسیب‌دیده را بررسی کنید",
+          "title_en": "Inspect the damaged bench"
+        },
+        {
+          "id": "request_repair",
+          "title_fa": "درخواست تعمیر را ثبت کنید",
+          "title_en": "Submit a repair request"
+        }
+      ]
     },
     {
       "id": "CIV-008",
@@ -135,7 +219,19 @@
       "priority": "عادی",
       "reward": 130,
       "trust": 4,
-      "target_label": "درخواست شهروند"
+      "target_label": "درخواست شهروند",
+      "objective_steps": [
+        {
+          "id": "review_request",
+          "title_fa": "درخواست شهروند را بررسی کنید",
+          "title_en": "Review the resident's request"
+        },
+        {
+          "id": "record_assistance",
+          "title_fa": "نتیجهٔ کمک‌رسانی را ثبت کنید",
+          "title_en": "Record the assistance outcome"
+        }
+      ]
     }
   ]
 }

@@ -381,6 +381,116 @@ func _initialize() -> void:
 		return
 	traffic_probe.free()
 
+
+	# Legacy missions without objective_steps retain a safe default workflow.
+	var legacy_steps: Array = manager.call("get_objective_steps", valid_mission_probe)
+	if legacy_steps.size() != 2:
+		push_error("Smoke test failed: legacy mission data did not receive the default two-step workflow.")
+		quit(1)
+		return
+	var duplicate_step_ids := valid_mission_probe.duplicate(true)
+	duplicate_step_ids["objective_steps"] = [
+		{"id": "same_step", "title_fa": "مرحله اول", "title_en": "First step"},
+		{"id": "same_step", "title_fa": "مرحله دوم", "title_en": "Second step"}
+	]
+	if bool(manager.call("is_valid_mission_data", duplicate_step_ids)):
+		push_error("Smoke test failed: duplicate objective step identifiers were accepted.")
+		quit(1)
+		return
+	for production_mission: Dictionary in catalogue:
+		var production_steps: Array = manager.call("get_objective_steps", production_mission)
+		if production_steps.size() != 2:
+			push_error("Smoke test failed: a production mission does not have two objective steps.")
+			quit(1)
+			return
+
+	# Exercise acceptance, distance gating, partial progress, JSON persistence and final reporting.
+	manager.set("active", false)
+	manager.set("active_mission", {})
+	manager.set("next_index", 0)
+	GameState.current_mission.clear()
+	GameState.mission_index = 0
+	var completed_before: int = GameState.missions_completed
+	if not bool(manager.call("accept_next_mission")):
+		push_error("Smoke test failed: the first production mission could not be accepted.")
+		quit(1)
+		return
+	var accepted_mission: Dictionary = manager.get("active_mission")
+	var target_coordinates: Array = accepted_mission.get("location", [])
+	var mission_target := Vector3(
+		float(target_coordinates[0]),
+		float(target_coordinates[1]),
+		float(target_coordinates[2])
+	)
+	var too_far_result: Dictionary = manager.call(
+		"advance_active_objective",
+		mission_target + Vector3(8.0, 0.0, 0.0),
+		"en"
+	)
+	if not too_far_result.is_empty():
+		push_error("Smoke test failed: mission progress advanced outside the objective radius.")
+		quit(1)
+		return
+	var first_step_result: Dictionary = manager.call("advance_active_objective", mission_target, "en")
+	if first_step_result.is_empty() or bool(first_step_result.get("completed", true)):
+		push_error("Smoke test failed: the first objective step did not leave the mission active.")
+		quit(1)
+		return
+	var progressed_mission: Dictionary = manager.get("active_mission")
+	if int(progressed_mission.get("objective_index", -1)) != 1:
+		push_error("Smoke test failed: the next objective index was not advanced.")
+		quit(1)
+		return
+	if GameState.current_mission.is_empty() or int(GameState.current_mission.get("objective_index", -1)) != 1:
+		push_error("Smoke test failed: intermediate mission progress was not copied to GameState.")
+		quit(1)
+		return
+	if not bool(manager.call("is_valid_mission_data", GameState.current_mission)):
+		push_error("Smoke test failed: active mission progress failed mission schema validation.")
+		quit(1)
+		return
+	var mission_save_payload: Dictionary = save_payload.duplicate(true)
+	mission_save_payload["mission_index"] = GameState.mission_index
+	mission_save_payload["current_mission"] = GameState.current_mission.duplicate(true)
+	var mission_save_error := str(save_manager.call("get_save_payload_validation_error", mission_save_payload))
+	if not mission_save_error.is_empty():
+		push_error("Smoke test failed: in-progress objective state failed save validation: %s" % mission_save_error)
+		quit(1)
+		return
+	var mission_round_trip: Variant = JSON.parse_string(JSON.stringify(mission_save_payload))
+	if not mission_round_trip is Dictionary:
+		push_error("Smoke test failed: objective progress did not survive JSON serialization.")
+		quit(1)
+		return
+	var round_trip_mission: Variant = mission_round_trip.get("current_mission", {})
+	if not round_trip_mission is Dictionary or int(round_trip_mission.get("objective_index", -1)) != 1:
+		push_error("Smoke test failed: serialized save did not retain the active objective index.")
+		quit(1)
+		return
+	var final_step_result: Dictionary = manager.call("advance_active_objective", mission_target, "en")
+	if not bool(final_step_result.get("completed", false)):
+		push_error("Smoke test failed: the final objective did not complete the mission.")
+		quit(1)
+		return
+	var mission_report: Variant = final_step_result.get("report", {})
+	if not mission_report is Dictionary:
+		push_error("Smoke test failed: final objective did not return a case report.")
+		quit(1)
+		return
+	var recorded_actions: Variant = mission_report.get("actions", [])
+	if not recorded_actions is Array or recorded_actions.size() != 2:
+		push_error("Smoke test failed: the case report did not preserve both completed objective actions.")
+		quit(1)
+		return
+	if manager.get("active") or not GameState.current_mission.is_empty():
+		push_error("Smoke test failed: mission completion left stale active mission state.")
+		quit(1)
+		return
+	if GameState.missions_completed != completed_before + 1:
+		push_error("Smoke test failed: mission completion and rewards were not applied exactly once.")
+		quit(1)
+		return
+
 	var interactables := instance.get_tree().get_nodes_in_group("interactables")
 	if interactables.size() < 9:
 		push_error("Smoke test failed: player services, vehicle, or citizens were not registered.")
@@ -412,5 +522,5 @@ func _initialize() -> void:
 	hud.call("close_panels")
 	instance.queue_free()
 	await process_frame
-	print("POLICE SIMULATOR 3D smoke test passed: world, managers, mission data, save-position sanitization, district catalog, traffic lane filtering, interactables, and UI overlays initialized.")
+	print("POLICE SIMULATOR 3D smoke test passed: world, managers, multi-stage missions, save recovery, district catalog, modular roads/buildings, traffic lane filtering, interactables, and UI overlays initialized.")
 	quit(0)

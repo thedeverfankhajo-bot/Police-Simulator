@@ -293,6 +293,13 @@ func _update_hud() -> void:
 	if missions.active:
 		var title_key := "title_en" if LocaleManager.language == "en" else "title_fa"
 		mission_text = str(missions.active_mission.get(title_key,""))
+		var objective_progress: Dictionary = missions.get_objective_progress(LocaleManager.language)
+		if not objective_progress.is_empty():
+			var progress_label := LocaleManager.translate("objective_progress") % [
+				int(objective_progress.get("index", 0)),
+				int(objective_progress.get("total", 0))
+			]
+			mission_text += "\n%s — %s" % [progress_label, str(objective_progress.get("title", ""))]
 		distance = _current_position().distance_to(_mission_target())
 	var speed: float = float(patrol_car.get_speed()) if driving else 0.0
 	var time_value: float = weather.day_time
@@ -308,7 +315,8 @@ func _update_prompt() -> void:
 	if nearest:
 		hud.set_prompt(str(nearest.get_meta("prompt",LocaleManager.translate("interact"))))
 	elif missions.active and missions.is_near_objective(player.global_position,4.0):
-		hud.set_prompt("E بررسی محل و تکمیل هدف")
+		var objective_title := missions.get_active_objective_title(LocaleManager.language)
+		hud.set_prompt("%s: %s" % [LocaleManager.translate("objective_step"), objective_title])
 	else:
 		hud.set_prompt("")
 
@@ -329,11 +337,18 @@ func _interact() -> void:
 				hud.show_citizen_dialog()
 		return
 	if missions.active and missions.is_near_objective(player.global_position,4.0):
-		var result: Dictionary = missions.complete_active_mission(player.global_position)
-		if not result.is_empty():
-			_clear_marker()
+		var result: Dictionary = missions.advance_active_objective(player.global_position, LocaleManager.language)
+		if result.is_empty():
+			return
+		if bool(result.get("completed", false)):
 			hud.show_notification(LocaleManager.translate("mission_done"))
 			_save_game()
+		else:
+			var next_title := missions.get_active_objective_title(LocaleManager.language)
+			var message := "%s: %s" % [LocaleManager.translate("objective_step_done"), next_title]
+			if not SaveManager.save_game(_current_position()):
+				message += " — " + LocaleManager.translate("save_failed")
+			hud.show_notification(message)
 		return
 	hud.show_notification("مورد تعاملی نزدیکی پیدا نشد")
 
