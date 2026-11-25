@@ -7,6 +7,7 @@ const HUD_SCRIPT = preload("res://scripts/ui/hud.gd")
 const MISSION_SCRIPT = preload("res://scripts/missions/mission_manager.gd")
 const WEATHER_SCRIPT = preload("res://scripts/environment/weather_controller.gd")
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic/traffic_manager.gd")
+const CITY_MANAGER_SCENE: PackedScene = preload("res://scenes/city/city_manager.tscn")
 
 var player: Variant
 var patrol_car: Variant
@@ -14,6 +15,7 @@ var hud: Variant
 var missions: Variant
 var weather: Variant
 var traffic: Variant
+var city_manager: Node
 var sun: DirectionalLight3D
 var environment_node: WorldEnvironment
 var rain: GPUParticles3D
@@ -25,6 +27,7 @@ var signal_clock := 0.0
 
 func _ready() -> void:
 	_build_environment()
+	_build_city_manager()
 	_build_city()
 	_build_station()
 	_spawn_player()
@@ -49,6 +52,8 @@ func _process(delta: float) -> void:
 				lamp.material_override = _emission_material(Color(0.15,0.8,0.34) if not bool(signal_node.get_meta("red")) else Color(0.9,0.1,0.08))
 	if rain and player:
 		rain.global_position = player.global_position + Vector3(0,10,0)
+	if is_instance_valid(city_manager):
+		city_manager.call("update_player_position", _current_position(), LocaleManager.language)
 	_update_hud()
 	_update_prompt()
 	if Input.is_action_just_pressed("interact") and not hud.is_panel_open():
@@ -451,20 +456,20 @@ func _cycle_weather() -> void:
 	weather.cycle_weather()
 	hud.show_notification("آب‌وهوا تغییر کرد")
 
+func _build_city_manager() -> void:
+	city_manager = CITY_MANAGER_SCENE.instantiate()
+	city_manager.name = "CityManager"
+	city_manager.connect("district_changed", Callable(self, "_on_district_changed"))
+	add_child(city_manager)
+
+func _on_district_changed(_previous_id: String, _current_id: String, label: String) -> void:
+	if is_instance_valid(hud):
+		hud.show_notification(label)
+
 func _district(p: Vector3) -> String:
-	if p.x > 50 and p.z > 45:
-		return "منطقه صنعتی"
-	if p.x > 48:
-		return "منطقه تجاری"
-	if p.x < -50 and p.z > 0:
-		return "محله مسکونی"
-	if p.x < -5 and p.x > -45 and p.z > 0 and p.z < 48:
-		return "پارک عمومی"
-	if p.z < -50:
-		return "مرکز شهر"
-	if p.x > 5 and p.z > 5 and p.z < 48:
-		return "مرکز پلیس"
-	return "بلوار اصلی"
+	if not is_instance_valid(city_manager):
+		return "ناحیه شمالی" if LocaleManager.language == "fa" else "North District"
+	return str(city_manager.call("get_district_label_at", p, LocaleManager.language))
 
 func _building(pos: Vector3, size: Vector3, palette: Array, district: String) -> void:
 	var color: Color = palette[randi()%palette.size()]

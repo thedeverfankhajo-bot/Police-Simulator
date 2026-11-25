@@ -27,6 +27,19 @@ func _initialize() -> void:
 		push_error("Smoke test failed: mission catalogue is missing entries.")
 		quit(1)
 		return
+	var city_manager: Node = instance.get_node_or_null("CityManager")
+	if city_manager == null or int(city_manager.call("get_district_count")) != 7:
+		push_error("Smoke test failed: the seven city district resources did not load.")
+		quit(1)
+		return
+	if str(city_manager.call("get_district_id_at", Vector3(20, 0, 28))) != "police_headquarters":
+		push_error("Smoke test failed: police headquarters district lookup failed.")
+		quit(1)
+		return
+	if str(city_manager.call("get_district_id_at", Vector3(-25, 0, 25))) != "public_park":
+		push_error("Smoke test failed: public park district lookup failed.")
+		quit(1)
+		return
 	var interactables := instance.get_tree().get_nodes_in_group("interactables")
 	if interactables.size() < 9:
 		push_error("Smoke test failed: player services, vehicle, or citizens were not registered.")
