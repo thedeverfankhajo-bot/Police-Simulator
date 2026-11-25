@@ -12,6 +12,7 @@ const ASPHALT_SHADER: Shader = preload("res://shaders/asphalt_surface.gdshader")
 @export var axis: Axis = Axis.NORTH_SOUTH
 
 var _built: bool = false
+var _asphalt_material: ShaderMaterial
 
 func configure(width: float, length: float, orientation: Axis) -> void:
 	if _built or is_inside_tree():
@@ -25,7 +26,17 @@ func configure(width: float, length: float, orientation: Axis) -> void:
 	axis = orientation
 
 func _ready() -> void:
+	add_to_group("weather_sensitive_surfaces")
 	_build_geometry()
+	for candidate: Node in get_tree().get_nodes_in_group("weather_managers"):
+		if is_instance_valid(candidate) and candidate.has_method("register_surface"):
+			candidate.call("register_surface", self)
+			break
+
+func set_surface_wetness(value: float) -> void:
+	if not is_finite(value) or _asphalt_material == null:
+		return
+	_asphalt_material.set_shader_parameter("wetness", clampf(value, 0.0, 1.0))
 
 func _build_geometry() -> void:
 	if _built:
@@ -40,15 +51,16 @@ func _build_geometry() -> void:
 	road_mesh.subdivide_width = 1
 	road_mesh.subdivide_depth = maxi(1, int(ceil(segment_length / 40.0)))
 
-	var asphalt_material := ShaderMaterial.new()
-	asphalt_material.shader = ASPHALT_SHADER
-	asphalt_material.set_shader_parameter("surface_dimensions", Vector2(road_width, segment_length))
-	asphalt_material.set_shader_parameter("asphalt_color", Vector3(0.105, 0.12, 0.135))
+	_asphalt_material = ShaderMaterial.new()
+	_asphalt_material.shader = ASPHALT_SHADER
+	_asphalt_material.set_shader_parameter("surface_dimensions", Vector2(road_width, segment_length))
+	_asphalt_material.set_shader_parameter("asphalt_color", Vector3(0.105, 0.12, 0.135))
+	_asphalt_material.set_shader_parameter("wetness", 0.0)
 
 	var surface := MeshInstance3D.new()
 	surface.name = "RoadSurface"
 	surface.mesh = road_mesh
-	surface.material_override = asphalt_material
+	surface.material_override = _asphalt_material
 	surface.position.y = 0.045
 	surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(surface)

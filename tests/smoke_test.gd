@@ -344,6 +344,39 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	var weather_surfaces: Array = instance.get_tree().get_nodes_in_group("weather_sensitive_surfaces")
+	if weather_surfaces.size() != 10:
+		push_error("Smoke test failed: all ten live city road segments were not registered for weather updates.")
+		quit(1)
+		return
+	var weather_road := weather_surfaces[0] as CityRoadSegment
+	var weather_road_surface := weather_road.get_node_or_null("RoadSurface") as MeshInstance3D if weather_road != null else null
+	var weather_road_material := weather_road_surface.material_override as ShaderMaterial if weather_road_surface != null else null
+	if weather_road_material == null or not is_equal_approx(float(weather_road_material.get_shader_parameter("wetness")), 0.0):
+		push_error("Smoke test failed: city asphalt did not initialize in its dry state.")
+		quit(1)
+		return
+	var weather_controller: Node = instance.get_node("WeatherController")
+	weather_controller.call("cycle_weather")
+	weather_controller.call("cycle_weather")
+	weather_controller.call("_process", 2.0)
+	if not is_equal_approx(float(weather_road_material.get_shader_parameter("wetness")), 0.94):
+		push_error("Smoke test failed: rainy weather did not transition city asphalt to its wet state.")
+		quit(1)
+		return
+	weather_controller.call("cycle_weather")
+	weather_controller.call("_process", 2.0)
+	if not is_equal_approx(float(weather_road_material.get_shader_parameter("wetness")), 0.28):
+		push_error("Smoke test failed: fog did not apply its damp-road surface response.")
+		quit(1)
+		return
+	weather_controller.call("cycle_weather")
+	weather_controller.call("_process", 2.0)
+	if not is_equal_approx(float(weather_road_material.get_shader_parameter("wetness")), 0.0):
+		push_error("Smoke test failed: dry weather did not restore the asphalt roughness state.")
+		quit(1)
+		return
+
 	var building_scene := load("res://scenes/city/city_building.tscn") as PackedScene
 	if building_scene == null:
 		push_error("Smoke test failed: reusable city building scene could not be loaded.")
@@ -401,6 +434,20 @@ func _initialize() -> void:
 	var road_markings := vertical_road.get_node_or_null("CenterLineDashes") as MultiMeshInstance3D
 	if road_plane == null or not road_plane.size.is_equal_approx(Vector2(10.0, 220.0)):
 		push_error("Smoke test failed: configured road surface dimensions were not applied.")
+		quit(1)
+		return
+	if asphalt_material == null or asphalt_material.shader == null or not asphalt_material.shader.code.contains("uniform float wetness"):
+		push_error("Smoke test failed: asphalt wetness shader uniform was not added.")
+		quit(1)
+		return
+	vertical_road.set_surface_wetness(1.5)
+	if not is_equal_approx(float(asphalt_material.get_shader_parameter("wetness")), 1.0):
+		push_error("Smoke test failed: road wetness setter did not clamp its upper bound.")
+		quit(1)
+		return
+	vertical_road.set_surface_wetness(-0.5)
+	if not is_equal_approx(float(asphalt_material.get_shader_parameter("wetness")), 0.0):
+		push_error("Smoke test failed: road wetness setter did not clamp its lower bound.")
 		quit(1)
 		return
 	if asphalt_material == null or asphalt_material.shader == null or not asphalt_material.shader.code.contains("ROUGHNESS"):

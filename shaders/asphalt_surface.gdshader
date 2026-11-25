@@ -2,6 +2,7 @@ shader_type spatial;
 
 uniform vec3 asphalt_color : source_color = vec3(0.105, 0.12, 0.135);
 uniform vec2 surface_dimensions = vec2(8.0, 220.0);
+uniform float wetness : hint_range(0.0, 1.0) = 0.0;
 
 float hash21(vec2 point) {
 	point = fract(point * vec2(123.34, 456.21));
@@ -50,6 +51,9 @@ void fragment() {
 		(grain - 0.5) * 0.05;
 	float worn_area = smoothstep(0.62, 0.92, wear) * 0.035;
 
+	float dry_roughness = clamp(0.88 + grain * 0.08, 0.80, 0.99);
+	float wetness_amount = clamp(wetness, 0.0, 1.0);
 	ALBEDO = asphalt_color * (0.90 + albedo_variation - worn_area);
-	ROUGHNESS = clamp(0.88 + grain * 0.08, 0.80, 0.99);
+	ALBEDO *= 1.0 - wetness_amount * 0.18;
+	ROUGHNESS = mix(dry_roughness, 0.24, wetness_amount);
 }
