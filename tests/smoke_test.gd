@@ -98,6 +98,128 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+
+	var save_manager: Node = root.get_node_or_null("SaveManager")
+	if save_manager == null:
+		push_error("Smoke test failed: SaveManager autoload was not found.")
+		quit(1)
+		return
+	var save_payload := {
+		"version": 1,
+		"saved_at": "2026-11-25T17:00:00",
+		"player_position": [3.0, 2.0, -4.0],
+		"score": 50,
+		"experience": 50,
+		"level": 1,
+		"public_trust": 65,
+		"missions_completed": 0,
+		"play_seconds": 12.0,
+		"reports": [],
+		"mission_index": 0,
+		"current_mission": {},
+		"audio_volume": 0.7,
+		"language": "fa"
+	}
+	if not bool(save_manager.call("is_valid_save_payload", save_payload)):
+		push_error("Smoke test failed: a valid version-one save payload was rejected.")
+		quit(1)
+		return
+	var invalid_save := save_payload.duplicate(true)
+	invalid_save["audio_volume"] = 2.0
+	if bool(save_manager.call("is_valid_save_payload", invalid_save)):
+		push_error("Smoke test failed: an out-of-range saved audio volume was accepted.")
+		quit(1)
+		return
+	invalid_save = save_payload.duplicate(true)
+	invalid_save["player_position"] = [1.0, INF, 2.0]
+	if bool(save_manager.call("is_valid_save_payload", invalid_save)):
+		push_error("Smoke test failed: a non-finite saved coordinate was accepted.")
+		quit(1)
+		return
+	invalid_save = save_payload.duplicate(true)
+	invalid_save.erase("reports")
+	if bool(save_manager.call("is_valid_save_payload", invalid_save)):
+		push_error("Smoke test failed: a save with a missing required field was accepted.")
+		quit(1)
+		return
+
+	var test_save_path := "user://police_simulator_smoke_save.json"
+	var test_backup_path := test_save_path + ".bak"
+	var test_temp_path := test_save_path + ".tmp"
+	for test_path: String in [test_save_path, test_backup_path, test_temp_path]:
+		if FileAccess.file_exists(test_path):
+			var cleanup_error := DirAccess.remove_absolute(test_path)
+			if cleanup_error != OK:
+				push_error("Smoke test failed: stale save test data could not be cleared.")
+				quit(1)
+				return
+	if not bool(save_manager.call("_write_payload_transactionally", save_payload, test_save_path)):
+		push_error("Smoke test failed: the first transactional save could not be written.")
+		quit(1)
+		return
+	save_payload["score"] = 100
+	if not bool(save_manager.call("_write_payload_transactionally", save_payload, test_save_path)):
+		push_error("Smoke test failed: the second save could not be written.")
+		quit(1)
+		return
+	var backup_payload: Variant = save_manager.call("_read_save_payload", test_backup_path)
+	if not backup_payload is Dictionary:
+		push_error("Smoke test failed: the previous valid save backup could not be read.")
+		quit(1)
+		return
+	if int(backup_payload.get("score", -1)) != 50:
+		push_error("Smoke test failed: the previous valid save was not preserved as a backup.")
+		quit(1)
+		return
+	invalid_save = save_payload.duplicate(true)
+	invalid_save["audio_volume"] = 4.0
+	if bool(save_manager.call("_write_payload_transactionally", invalid_save, test_save_path)):
+		push_error("Smoke test failed: an invalid save payload replaced the primary save.")
+		quit(1)
+		return
+	var preserved_payload: Variant = save_manager.call("_read_save_payload", test_save_path)
+	if not preserved_payload is Dictionary:
+		push_error("Smoke test failed: rejecting an invalid save damaged the existing save.")
+		quit(1)
+		return
+	if int(preserved_payload.get("score", -1)) != 100:
+		push_error("Smoke test failed: the last valid primary save was not preserved.")
+		quit(1)
+		return
+	var corrupt_file := FileAccess.open(test_save_path, FileAccess.WRITE)
+	if corrupt_file == null:
+		push_error("Smoke test failed: the primary save could not be prepared for the recovery test.")
+		quit(1)
+		return
+	corrupt_file.store_string("{corrupt json")
+	corrupt_file.flush()
+	corrupt_file.close()
+	var recovered_payload: Variant = save_manager.call("_load_payload_with_backup", test_save_path, test_backup_path)
+	if not recovered_payload is Dictionary:
+		push_error("Smoke test failed: a corrupt primary save did not recover from the backup.")
+		quit(1)
+		return
+	if int(recovered_payload.get("score", -1)) != 50:
+		push_error("Smoke test failed: the backup did not restore the previous save state.")
+		quit(1)
+		return
+	var restored_payload: Variant = save_manager.call("_read_save_payload", test_save_path)
+	if not restored_payload is Dictionary:
+		push_error("Smoke test failed: the recovered primary save could not be read.")
+		quit(1)
+		return
+	if int(restored_payload.get("score", -1)) != 50:
+		push_error("Smoke test failed: the recovered backup was not restored as the primary save.")
+		quit(1)
+		return
+	if FileAccess.file_exists(test_temp_path):
+		push_error("Smoke test failed: a completed save left a temporary file behind.")
+		quit(1)
+		return
+	for test_path: String in [test_save_path, test_backup_path, test_temp_path]:
+		if FileAccess.file_exists(test_path):
+			DirAccess.remove_absolute(test_path)
+
 	var city_manager: Node = instance.get_node_or_null("CityManager")
 	if city_manager == null or int(city_manager.call("get_district_count")) != 7:
 		push_error("Smoke test failed: the seven city district resources did not load.")
