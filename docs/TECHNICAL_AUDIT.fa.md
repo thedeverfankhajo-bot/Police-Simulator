@@ -205,3 +205,15 @@
 
 
 - تحلیل دو اجرای verbose نشان داد AudioStreamGeneratorPlayback حتی پس از حذف مرجع دائمی و آزادسازی AudioStreamPlayer در Runner بدون دستگاه صوتی باقی می‌ماند. در حالت headless اکنون AudioManager اصلاً AudioStreamGenerator نمی‌سازد و پردازش صوت را غیرفعال می‌کند؛ در اجرای تعاملی، مسیر صدای procedural دست‌نخورده و فعال باقی می‌ماند. این تغییر باید در CI headless تأیید شود.
+
+
+## نتیجهٔ نهایی رفع ObjectDB leak و تفکیک Builderها — 2026-11-25
+
+- CI run: 45661232097 — success روی commit d28554bea6118d7f39ee0748bfd85b2f3850969e.
+- Import/Parse و Smoke Test در Godot 4.7.2 موفق شدند.
+- اجرای verbose پس از غیرفعال‌کردن AudioStreamGenerator در حالت headless هیچ‌کدام از پیام‌های ObjectDB instance was leaked، Leaked instance یا Orphan StringName را ثبت نکرد. Smoke Test همچنین بررسی می‌کند که AudioManager در headless backend صوتی نسازد.
+- این رفع نشت برای مسیر headless/CI تأیید شده است. اجرای تعاملی روی سیستم‌عامل و کارت صدای واقعی در این محیط انجام نشده؛ مسیر صوتی procedural در اجرای غیر-headless حفظ شده و باید در QA پلتفرم هدف نیز بررسی شود.
+- تفکیک Builderها در همین CI با موفقیت Parse و اجرا شد: ۱۰ قطعه جاده، ۵ چراغ تقاطع و ۶ چراغ خیابان در Smoke Test شمرده شدند.
+- main.gd اکنون نقش هماهنگ‌کنندهٔ ساخت جهان را دارد؛ ساخت سطح و پارک، شبکهٔ جاده/تقاطع و ساختمان ایستگاه پلیس در سه اسکریپت مستقل قرار گرفته‌اند.
+- فایل docs/ASSET_PIPELINE_AND_LICENSES.md فرایند بررسی Blender/glTF و دفتر ثبت مجوز را تعریف می‌کند. هیچ Asset خارجی وارد نشده است.
+- ساختمان ایستگاه پلیس در این مرحله همچنان هندسهٔ رویه‌ای و فضای داخلی کامل/قابل‌بازی ندارد. مدل‌های Blender دارای مجوز تجاری نیز هنوز تهیه یا وارد نشده‌اند.
