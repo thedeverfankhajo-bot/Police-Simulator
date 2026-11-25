@@ -272,6 +272,17 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	var loaded_block_catalog := load("res://data/city/city_block_catalog.tres") as CityBlockCatalog
+	if loaded_block_catalog == null or loaded_block_catalog.blocks.size() != 5:
+		push_error("Smoke test failed: typed city block catalog resource did not load five block definitions.")
+		quit(1)
+		return
+	for block_definition: CityBlockDefinition in loaded_block_catalog.blocks:
+		if block_definition == null or not block_definition.is_valid_definition():
+			push_error("Smoke test failed: city block catalog contains an invalid typed definition.")
+			quit(1)
+			return
+
 	var block_manager: Node = instance.get_node_or_null("CityBlockManager")
 	if block_manager == null:
 		push_error("Smoke test failed: the data-driven city block manager was not added to the world.")
