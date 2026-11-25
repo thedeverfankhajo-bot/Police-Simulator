@@ -43,8 +43,11 @@ func load_game() -> Dictionary:
 	return data
 
 func is_valid_save_payload(value: Variant) -> bool:
+	return get_save_payload_validation_error(value).is_empty()
+
+func get_save_payload_validation_error(value: Variant) -> String:
 	if not value is Dictionary:
-		return false
+		return "root value must be a Dictionary"
 	var payload: Dictionary = value
 
 	var required_fields: Array[String] = [
@@ -54,24 +57,24 @@ func is_valid_save_payload(value: Variant) -> bool:
 	]
 	for field_name: String in required_fields:
 		if not payload.has(field_name):
-			return false
+			return "required field is missing: %s" % field_name
 
 	var version_value: Variant = payload["version"]
 	if not version_value is int or int(version_value) != SAVE_VERSION:
-		return false
+		return "version must be integer %d" % SAVE_VERSION
 
 	var timestamp_value: Variant = payload["saved_at"]
 	if not timestamp_value is String or timestamp_value.strip_edges().is_empty():
-		return false
+		return "saved_at must be a non-empty String"
 
 	var position_value: Variant = payload["player_position"]
 	if not position_value is Array:
-		return false
+		return "player_position must be an Array"
 	if position_value.size() != 3:
-		return false
+		return "player_position must contain exactly three coordinates"
 	for coordinate: Variant in position_value:
 		if not (coordinate is int or coordinate is float) or not is_finite(float(coordinate)):
-			return false
+			return "player_position contains a non-numeric or non-finite coordinate"
 
 	var integer_ranges := {
 		"score": Vector2(0.0, INF),
@@ -84,41 +87,41 @@ func is_valid_save_payload(value: Variant) -> bool:
 	for field_name: String in integer_ranges:
 		var field_value: Variant = payload[field_name]
 		if not field_value is int:
-			return false
+			return "%s must be an integer" % field_name
 		var numeric_value := float(field_value)
 		var allowed_range: Vector2 = integer_ranges[field_name]
 		if not is_finite(numeric_value) or numeric_value < allowed_range.x or numeric_value > allowed_range.y:
-			return false
+			return "%s is outside its allowed range" % field_name
 
 	for field_name: String in ["play_seconds", "audio_volume"]:
 		var field_value: Variant = payload[field_name]
 		if not (field_value is int or field_value is float):
-			return false
+			return "%s must be numeric" % field_name
 		var numeric_value := float(field_value)
 		if not is_finite(numeric_value) or numeric_value < 0.0:
-			return false
+			return "%s must be finite and non-negative" % field_name
 		if field_name == "audio_volume" and numeric_value > 1.0:
-			return false
+			return "audio_volume must be between 0 and 1"
 
 	var reports_value: Variant = payload["reports"]
 	if not reports_value is Array:
-		return false
+		return "reports must be an Array"
 	if reports_value.size() > 200:
-		return false
+		return "reports exceeds the 200-entry limit"
 	for report: Variant in reports_value:
 		if not report is Dictionary:
-			return false
+			return "every report entry must be a Dictionary"
 
 	if not payload["current_mission"] is Dictionary:
-		return false
+		return "current_mission must be a Dictionary"
 
 	var language_value: Variant = payload["language"]
 	if not language_value is String:
-		return false
+		return "language must be a String"
 	if not ["fa", "en"].has(language_value):
-		return false
+		return "language must be 'fa' or 'en'"
 
-	return true
+	return ""
 
 func _write_payload_transactionally(payload: Dictionary, target_path: String) -> bool:
 	if not is_valid_save_payload(payload):
@@ -193,8 +196,9 @@ func _read_save_payload(path: String) -> Dictionary:
 	var raw := file.get_as_text()
 	file.close()
 	var parsed: Variant = JSON.parse_string(raw)
-	if not is_valid_save_payload(parsed):
-		push_warning("Save file failed JSON or schema validation: %s" % path)
+	var validation_error := get_save_payload_validation_error(parsed)
+	if not validation_error.is_empty():
+		push_warning("Save file failed JSON or schema validation (%s): %s" % [validation_error, path])
 		return {}
 	return parsed
 

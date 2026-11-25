@@ -120,8 +120,9 @@ func _initialize() -> void:
 		"audio_volume": 0.7,
 		"language": "fa"
 	}
-	if not bool(save_manager.call("is_valid_save_payload", save_payload)):
-		push_error("Smoke test failed: a valid version-one save payload was rejected.")
+	var save_validation_error := str(save_manager.call("get_save_payload_validation_error", save_payload))
+	if not save_validation_error.is_empty():
+		push_error("Smoke test failed: a valid version-one save payload was rejected: %s" % save_validation_error)
 		quit(1)
 		return
 	var invalid_save := save_payload.duplicate(true)
