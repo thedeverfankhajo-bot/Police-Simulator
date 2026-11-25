@@ -86,6 +86,11 @@ func _initialize() -> void:
 		push_error("Smoke test failed: malformed saved coordinates did not use the safe spawn.")
 		quit(1)
 		return
+	var malformed_last_position: Array[float] = position_sanitizer.sanitize_position_data([5.0, 6.0, "invalid"], fallback_spawn)
+	if not is_equal_approx(malformed_last_position[0], fallback_spawn.x) or not is_equal_approx(malformed_last_position[1], fallback_spawn.y) or not is_equal_approx(malformed_last_position[2], fallback_spawn.z):
+		push_error("Smoke test failed: a malformed final coordinate partially changed the fallback position.")
+		quit(1)
+		return
 	var restored_values: Array[float] = position_sanitizer.sanitize_position_data([3.0, 2.0, -4.0], fallback_spawn)
 	var restored_position := Vector3(restored_values[0], restored_values[1], restored_values[2])
 	if not restored_position.is_equal_approx(Vector3(3.0, 2.0, -4.0)):
