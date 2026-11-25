@@ -404,13 +404,19 @@ func _initialize() -> void:
 			quit(1)
 			return
 
+	var game_state: Node = root.get_node_or_null("GameState")
+	if game_state == null:
+		push_error("Smoke test failed: GameState autoload was not found.")
+		quit(1)
+		return
+
 	# Exercise acceptance, distance gating, partial progress, JSON persistence and final reporting.
 	manager.set("active", false)
 	manager.set("active_mission", {})
 	manager.set("next_index", 0)
-	GameState.current_mission.clear()
-	GameState.mission_index = 0
-	var completed_before: int = GameState.missions_completed
+	game_state.set("current_mission", {})
+	game_state.set("mission_index", 0)
+	var completed_before: int = int(game_state.get("missions_completed"))
 	if not bool(manager.call("accept_next_mission")):
 		push_error("Smoke test failed: the first production mission could not be accepted.")
 		quit(1)
@@ -441,17 +447,18 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the next objective index was not advanced.")
 		quit(1)
 		return
-	if GameState.current_mission.is_empty() or int(GameState.current_mission.get("objective_index", -1)) != 1:
-		push_error("Smoke test failed: intermediate mission progress was not copied to GameState.")
+	var current_mission_after_progress: Dictionary = game_state.get("current_mission")
+	if current_mission_after_progress.is_empty() or int(current_mission_after_progress.get("objective_index", -1)) != 1:
+		push_error("Smoke test failed: intermediate mission progress was not copied to the game state store.")
 		quit(1)
 		return
-	if not bool(manager.call("is_valid_mission_data", GameState.current_mission)):
+	if not bool(manager.call("is_valid_mission_data", current_mission_after_progress)):
 		push_error("Smoke test failed: active mission progress failed mission schema validation.")
 		quit(1)
 		return
 	var mission_save_payload: Dictionary = save_payload.duplicate(true)
-	mission_save_payload["mission_index"] = GameState.mission_index
-	mission_save_payload["current_mission"] = GameState.current_mission.duplicate(true)
+	mission_save_payload["mission_index"] = int(game_state.get("mission_index"))
+	mission_save_payload["current_mission"] = current_mission_after_progress.duplicate(true)
 	var mission_save_error := str(save_manager.call("get_save_payload_validation_error", mission_save_payload))
 	if not mission_save_error.is_empty():
 		push_error("Smoke test failed: in-progress objective state failed save validation: %s" % mission_save_error)
@@ -482,11 +489,12 @@ func _initialize() -> void:
 		push_error("Smoke test failed: the case report did not preserve both completed objective actions.")
 		quit(1)
 		return
-	if manager.get("active") or not GameState.current_mission.is_empty():
+	var current_mission_after_completion: Dictionary = game_state.get("current_mission")
+	if manager.get("active") or not current_mission_after_completion.is_empty():
 		push_error("Smoke test failed: mission completion left stale active mission state.")
 		quit(1)
 		return
-	if GameState.missions_completed != completed_before + 1:
+	if int(game_state.get("missions_completed")) != completed_before + 1:
 		push_error("Smoke test failed: mission completion and rewards were not applied exactly once.")
 		quit(1)
 		return

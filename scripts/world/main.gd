@@ -315,7 +315,7 @@ func _update_prompt() -> void:
 	if nearest:
 		hud.set_prompt(str(nearest.get_meta("prompt",LocaleManager.translate("interact"))))
 	elif missions.active and missions.is_near_objective(player.global_position,4.0):
-		var objective_title := missions.get_active_objective_title(LocaleManager.language)
+		var objective_title: String = str(missions.get_active_objective_title(LocaleManager.language))
 		hud.set_prompt("%s: %s" % [LocaleManager.translate("objective_step"), objective_title])
 	else:
 		hud.set_prompt("")
@@ -344,7 +344,7 @@ func _interact() -> void:
 			hud.show_notification(LocaleManager.translate("mission_done"))
 			_save_game()
 		else:
-			var next_title := missions.get_active_objective_title(LocaleManager.language)
+			var next_title: String = str(missions.get_active_objective_title(LocaleManager.language))
 			var message := "%s: %s" % [LocaleManager.translate("objective_step_done"), next_title]
 			if not SaveManager.save_game(_current_position()):
 				message += " — " + LocaleManager.translate("save_failed")
